@@ -632,7 +632,7 @@ export default function DriverPortal() {
         }`}>
           <div className="text-left">
             <span className="text-[8.5px] block font-bold text-slate-400 uppercase tracking-wider">Bonjour</span>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+            <h3 className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
               {driver ? driver.name.split(' ')[0] : 'Amadou Sow'} 👋
             </h3>
           </div>
