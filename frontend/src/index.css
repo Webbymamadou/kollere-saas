@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+:root {
+  --color-primary: #6D4AFF;
+  --color-primary-hover: #5636E5;
+  --color-primary-light: rgba(109, 74, 255, 0.08);
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-slate-background: #F8FAFC;
+}
+
+html, body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--color-slate-background);
+  color: #0F172A;
+  overscroll-behavior-x: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar styling for a cleaner look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E2E8F0;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #CBD5E1;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes pulseBorder {
+  0%, 100% { border-color: rgba(109, 74, 255, 0.1); }
+  50% { border-color: rgba(109, 74, 255, 0.3); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pulse-border {
+  animation: pulseBorder 2s infinite ease-in-out;
+}
+
+/* Car ride animation preserved from original specification */
+@keyframes car-ride {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(2px) translateY(-0.5px); }
+  50% { transform: translateX(4px) translateY(0); }
+  75% { transform: translateX(2px) translateY(0.5px); }
+}
+
+.animate-car-ride {
+  animation: car-ride 1.5s infinite ease-in-out;
+}
+
+.animate-car-ride:hover {
+  animation: car-ride 0.4s infinite linear;
+}
+
+/* Glassmorphism helpers */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}

@@ -1,0 +1,16 @@
+{
+  "short_name": "Versé Drive",
+  "name": "Versé - Portail Chauffeur VTC Dakar",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": "/driver/login",
+  "background_color": "#05080f",
+  "theme_color": "#fbbf24",
+  "display": "standalone",
+  "orientation": "portrait"
+}
