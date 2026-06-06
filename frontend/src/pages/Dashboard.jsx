@@ -439,6 +439,87 @@ export default function Dashboard() {
     { id: 'doc_4', type: 'Visite Technique Annuelle', vehicle: 'DK-3421-A', expiry: '2026-06-25', status: 'expiring', file: 'controtech_dk3421a.pdf' }
   ];
 
+  // Génère et télécharge un PDF HTML pour un document administratif
+  const handleDownloadDocPdf = (doc) => {
+    const statusLabel = doc.status === 'expiring' ? 'Expirera bientôt' : 'Valide';
+    const statusColor = doc.status === 'expiring' ? '#D97706' : '#16A34A';
+    const today = new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>${doc.type} — ${doc.vehicle}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #fff; color: #0F172A; padding: 48px; }
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #6D4AFF; padding-bottom: 20px; margin-bottom: 32px; }
+    .brand { font-size: 22px; font-weight: 900; color: #6D4AFF; }
+    .brand span { color: #0F172A; }
+    .badge { background: ${statusColor}20; color: ${statusColor}; border: 1px solid ${statusColor}40; border-radius: 8px; padding: 4px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    h1 { font-size: 24px; font-weight: 900; margin-bottom: 8px; }
+    .subtitle { font-size: 13px; color: #64748B; margin-bottom: 32px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+    .field { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px; }
+    .field-label { font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .field-value { font-size: 14px; font-weight: 700; color: #0F172A; }
+    .footer { border-top: 1px solid #E2E8F0; padding-top: 20px; font-size: 11px; color: #94A3B8; display: flex; justify-content: space-between; }
+    .watermark { text-align: center; margin: 24px 0; color: #CBD5E1; font-size: 11px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="brand">Verse<span>SaaS</span></div>
+    <div class="badge">${statusLabel}</div>
+  </div>
+  <h1>${doc.type}</h1>
+  <p class="subtitle">Document administratif de la flotte VTC — Généré automatiquement</p>
+  <div class="grid">
+    <div class="field">
+      <div class="field-label">Véhicule concerné</div>
+      <div class="field-value">${doc.vehicle}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Type de document</div>
+      <div class="field-value">${doc.type}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Date d'expiration</div>
+      <div class="field-value">${doc.expiry}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Fichier source</div>
+      <div class="field-value">${doc.file}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Statut</div>
+      <div class="field-value" style="color: ${statusColor}">${statusLabel}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Date de génération</div>
+      <div class="field-value">${today}</div>
+    </div>
+  </div>
+  <div class="watermark">⬛ Ce document a été généré par VerseSaaS — à valider auprès des autorités compétentes</div>
+  <div class="footer">
+    <span>VerseSaaS — Gestion de Flotte VTC</span>
+    <span>Réf. ${doc.id.toUpperCase()} · ${today}</span>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = doc.file.replace('.pdf', '') + '_verse.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   // Filtered lists for search and selectors
   const filteredVehicles = vehicles.filter(v => 
     v.brand_model.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -1856,7 +1937,10 @@ export default function Dashboard() {
                           <span>Date d'expiration :</span>
                           <span className="font-mono text-slate-800">{doc.expiry}</span>
                         </div>
-                        <button className="w-full bg-slate-50 hover:bg-slate-100 text-slate-650 hover:text-slate-900 text-[9.5px] font-bold py-1.5 rounded-lg border border-slate-200/50 transition-all cursor-pointer">
+                        <button 
+                          onClick={() => handleDownloadDocPdf(doc)}
+                          className="w-full bg-slate-50 hover:bg-[#6D4AFF] hover:text-white text-slate-650 text-[9.5px] font-bold py-1.5 rounded-lg border border-slate-200/50 hover:border-[#6D4AFF] transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                           Télécharger (PDF)
                         </button>
                       </div>
