@@ -573,6 +573,8 @@ export default function DriverPortal() {
     }
   };
 
+  if (!driver || !vehicle) return null;
+
   // Calculations for current daily status
   const todayStr = new Date().toISOString().split('T')[0];
   const myPaymentsToday = payments.filter(p => p.driver_name === driver.name && p.date === todayStr);
@@ -588,8 +590,6 @@ export default function DriverPortal() {
       setMockNotifications(prev => prev.map(n => ({ ...n, read: true })));
     }
   };
-
-  if (!driver || !vehicle) return null;
 
   return (
     <div className={`min-h-screen flex flex-col items-center justify-center p-0 sm:p-6 select-none font-sans relative overflow-hidden transition-colors duration-300 ${
