@@ -8,7 +8,6 @@ import {
   MessageSquareCode, 
   Sun, 
   Moon, 
-  Volume2, 
   Smartphone, 
   Link2, 
   Loader2, 
@@ -34,9 +33,6 @@ export default function DriverLogin() {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockoutTime, setLockoutTime] = useState(0); // in seconds
   
-  // Speech TTS / Accessibility settings
-  const [voiceLang, setVoiceLang] = useState('fr'); // 'fr' or 'wo'
-  
   // Magic link check state
   const [validatingToken, setValidatingToken] = useState(false);
   const [magicLinkError, setMagicLinkError] = useState('');
@@ -45,6 +41,7 @@ export default function DriverLogin() {
   const [darkMode, setDarkMode] = useState(true);
   const [error, setError] = useState('');
   const [shake, setShake] = useState(false);
+  const [showDevTools, setShowDevTools] = useState(false);
   
   const navigate = useNavigate();
 
@@ -113,18 +110,6 @@ export default function DriverLogin() {
     setTimeout(() => setError(''), 4000);
   };
 
-  // Text-To-Speech reader for accessibility
-  const speakHelp = (textFr, textWo) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const speakText = voiceLang === 'wo' ? textWo : textFr;
-      const utterance = new SpeechSynthesisUtterance(speakText);
-      utterance.lang = voiceLang === 'wo' ? 'en-US' : 'fr-FR'; // Wolof falls back to standard voice with custom phonetics if needed, but we read it slowly
-      utterance.rate = 0.85; // slightly slower for better comprehensibility
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
   // Handle standard PIN Login
   const handlePinLogin = (e) => {
     e.preventDefault();
@@ -137,7 +122,6 @@ export default function DriverLogin() {
 
     if (!phone || !pin) {
       triggerError("Veuillez remplir le numéro et le PIN.");
-      speakHelp("Veuillez saisir votre numéro de téléphone et votre code PIN à 4 chiffres.", "S'il vous plaît bindal sa numéro téléphone ak sa code PIN.");
       return;
     }
 
@@ -168,10 +152,8 @@ export default function DriverLogin() {
       if (nextFailures >= 3) {
         setLockoutTime(30); // block for 30s
         triggerError("Trop de tentatives incorrectes. Clavier verrouillé pour 30s.");
-        speakHelp("Trop de tentatives incorrectes. Votre compte est bloqué pour 30 secondes.", "Code yi dangua ciy réth. Danguaye khar parat 30 secondes.");
       } else {
         triggerError(`Code PIN incorrect. Tentatives restantes : ${3 - nextFailures}`);
-        speakHelp("Le code PIN saisi est incorrect. Veuillez réessayer.", "Code PIN bi danguako dioum. S'il vous plaît défaralate ko.");
       }
     }
   };
@@ -183,7 +165,6 @@ export default function DriverLogin() {
 
     if (!phone) {
       triggerError("Veuillez saisir votre numéro de téléphone.");
-      speakHelp("Saisissez votre numéro de téléphone d'abord.", "Bindal sa numéro téléphone ba paré.");
       return;
     }
 
@@ -192,7 +173,6 @@ export default function DriverLogin() {
 
     if (!driver) {
       triggerError("Ce numéro ne correspond à aucun chauffeur enregistré.");
-      speakHelp("Ce numéro n'existe pas dans notre système. Contactez votre propriétaire.", "Numéro bi amoul ci système bi. Wotal sa boss.");
       return;
     }
 
@@ -206,7 +186,6 @@ export default function DriverLogin() {
       setSmsNotification({
         body: `[SMS Versé] Votre code de connexion sécurisé est : ${code}`
       });
-      speakHelp(`Vous avez reçu le code par SMS. C'est le ${code.split('').join(' ')}`, `Code bi yone nagnou ko par SMS. Moy ${code.split('').join(' ')}`);
       // Auto dismiss SMS notification after 8 seconds
       setTimeout(() => setSmsNotification(null), 8000);
     }, 800);
@@ -257,7 +236,6 @@ export default function DriverLogin() {
         triggerError("Trop de tentatives incorrectes. Clavier verrouillé pour 30s.");
       } else {
         triggerError(`Code de validation SMS incorrect. Tentatives restantes : ${3 - nextFailures}`);
-        speakHelp("Le code SMS est incorrect. Veuillez vérifier le message.", "Code SMS bi danguako dioum. Kharal ma wakhate lako.");
       }
     }
   };
@@ -292,28 +270,6 @@ export default function DriverLogin() {
         navigate('/driver/portal');
       }
     }, 1500);
-  };
-
-  // Read current active guide instructions based on login step
-  const triggerCurrentVoiceGuide = () => {
-    if (loginMode === 'pin') {
-      speakHelp(
-        "Bienvenue sur votre portail chauffeur Versé. Veuillez entrer votre numéro de téléphone WhatsApp dans le premier champ, et votre code secret à quatre chiffres dans le deuxième champ. Appuyez ensuite sur le bouton violet Se connecter.",
-        "Marhaban ci portal chauffeur Versé. S'il vous plaît bindal sa numéro téléphone WhatsApp ci biir gokh bou dieuk bi, ak sa code secret gnanti chiffre ci gokh bi ci souf. Cuqal bouton violet bi niou bind Se connecter ngir doug."
-      );
-    } else {
-      if (!otpSent) {
-        speakHelp(
-          "Entrez votre numéro de téléphone et cliquez sur le bouton violet pour recevoir un code à quatre chiffres par SMS.",
-          "Bindal sa numéro téléphone ci biir gokh bi, té cuq bouton violet bi ngir niou yone la code gnanti chiffre par SMS."
-        );
-      } else {
-        speakHelp(
-          "Un code de sécurité vous a été envoyé par SMS. Entrez le code à quatre chiffres reçu dans la case et appuyez sur Confirmer le code.",
-          "Code sécurité yone nagnou lako par SMS. Bindal code bobou ci gokh bi, té cuq bouton Confirmer le code."
-        );
-      }
-    }
   };
 
   return (
@@ -399,9 +355,8 @@ export default function DriverLogin() {
 
           {/* Form Container */}
           <div className={`relative z-20 flex-1 flex flex-col justify-center my-auto py-6 space-y-5 ${shake ? 'shake-element' : ''}`}>
-            
-            <div className="text-center space-y-1">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 bg-[#6D4AFF]/5 text-[#6D4AFF]">
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2 bg-[#6D4AFF]/5 text-[#6D4AFF]">
                 {loginMode === 'pin' ? <Lock className="w-5.5 h-5.5" /> : <KeyRound className="w-5.5 h-5.5" />}
               </div>
               <h2 className="text-lg font-bold tracking-tight text-slate-900">
@@ -410,6 +365,7 @@ export default function DriverLogin() {
               <p className="text-xs max-w-[260px] mx-auto text-slate-500 font-medium leading-relaxed">
                 Connectez-vous pour transmettre vos versements et trajets journaliers.
               </p>
+
             </div>
 
             {/* Error notifications */}
@@ -428,47 +384,6 @@ export default function DriverLogin() {
                 <span className="text-[10px] text-slate-500">Veuillez patienter : <strong className="font-mono text-amber-600 text-xs">{lockoutTime}s</strong></span>
               </div>
             )}
-
-            {/* Bilingual Voice Assistance Widget */}
-            <div className="bg-white border border-slate-100 p-3.5 rounded-2xl flex flex-col gap-2 shadow-sm">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-[#6D4AFF]">
-                  <Volume2 className="w-4 h-4 animate-bounce" /> Aide vocale / Assistant
-                </span>
-                
-                {/* Language Switcher */}
-                <div className="flex gap-1">
-                  <button 
-                    onClick={() => setVoiceLang('fr')}
-                    className={`text-[9px] font-bold px-2 py-0.5 rounded transition-colors ${
-                      voiceLang === 'fr' 
-                        ? 'bg-[#6D4AFF] text-white' 
-                        : 'bg-slate-100 text-slate-500 border border-slate-200'
-                    }`}
-                  >
-                    Français
-                  </button>
-                  <button 
-                    onClick={() => setVoiceLang('wo')}
-                    className={`text-[9px] font-bold px-2 py-0.5 rounded transition-colors ${
-                      voiceLang === 'wo' 
-                        ? 'bg-[#6D4AFF] text-white' 
-                        : 'bg-slate-100 text-slate-500 border border-slate-200'
-                    }`}
-                  >
-                    Wolof 🇸🇳
-                  </button>
-                </div>
-              </div>
-              
-              <button
-                type="button"
-                onClick={triggerCurrentVoiceGuide}
-                className="w-full py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-[#6D4AFF]/5 text-[#6D4AFF] hover:bg-[#6D4AFF]/10 cursor-pointer"
-              >
-                🔊 Écouter les instructions
-              </button>
-            </div>
 
             {/* Login Fields Form */}
             {loginMode === 'pin' ? (
@@ -593,52 +508,69 @@ export default function DriverLogin() {
               {loginMode === 'pin' ? "S'authentifier plutôt par code SMS (OTP)" : "S'authentifier plutôt par code PIN"}
             </button>
 
-            {/* Simulated Live Magic Link Button */}
-            <div className="p-4 rounded-3xl border border-slate-150 bg-white text-slate-600 text-center space-y-3 shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 text-slate-700">
-                <Link2 className="w-4 h-4 text-[#6D4AFF]" />
-                Simulateur Magic Link (WhatsApp)
-              </p>
-              
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => simulateMagicLink('d1')}
-                  className="text-[10px] font-bold py-2 rounded-xl text-center active:scale-95 border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
-                >
-                  🔗 Moussa
-                </button>
-                <button
-                  type="button"
-                  onClick={() => simulateMagicLink('d2')}
-                  className="text-[10px] font-bold py-2 rounded-xl text-center active:scale-95 border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
-                >
-                  🔗 Amadou
-                </button>
-              </div>
-            </div>
+            {/* Collapsible Demo Tools */}
+            <div className="border border-slate-150 rounded-3xl bg-white shadow-sm overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowDevTools(!showDevTools)}
+                className="w-full px-4 py-3 flex justify-between items-center text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5">
+                  <UserCheck className="w-4 h-4 text-[#6D4AFF]" />
+                  Simulateurs & Remplissage démo
+                </span>
+                <span className="text-xs text-slate-400">{showDevTools ? '▲' : '▼'}</span>
+              </button>
 
-            {/* Quick demo account connections */}
-            <div className="p-4 rounded-3xl border border-slate-150 bg-white text-slate-650 text-left space-y-2.5 shadow-sm text-xs">
-              <p className="font-bold flex items-center gap-1.5 text-slate-800">
-                <UserCheck className="w-4 h-4 text-[#6D4AFF]" />
-                Remplissage Auto (Démo PIN) :
-              </p>
-              
-              <div className="grid grid-cols-2 gap-2">
-                <button 
-                  onClick={() => selectDemoAccount('771234567', '1234')}
-                  className="w-full border border-slate-200 text-[10px] font-bold py-2 rounded-xl text-center transition-all active:scale-95 cursor-pointer bg-slate-50 text-slate-700 hover:bg-slate-100"
-                >
-                  🚗 Moussa (v1)
-                </button>
-                <button 
-                  onClick={() => selectDemoAccount('779876543', '5678')}
-                  className="w-full border border-slate-200 text-[10px] font-bold py-2 rounded-xl text-center transition-all active:scale-95 cursor-pointer bg-slate-50 text-slate-700 hover:bg-slate-100"
-                >
-                  🚕 Amadou (v2)
-                </button>
-              </div>
+              {showDevTools && (
+                <div className="px-4 pb-4 pt-1 border-t border-slate-100 space-y-3 animate-fade-in">
+                  {/* Magic Link Simulator */}
+                  <div className="space-y-1.5">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                      Simulateur Magic Link (WhatsApp)
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => simulateMagicLink('d1')}
+                        className="text-[10px] font-bold py-2 rounded-xl text-center active:scale-95 border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
+                      >
+                        🔗 Moussa
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => simulateMagicLink('d2')}
+                        className="text-[10px] font-bold py-2 rounded-xl text-center active:scale-95 border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
+                      >
+                        🔗 Amadou
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Quick demo account connections */}
+                  <div className="space-y-1.5">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                      Remplissage Auto (Démo PIN) :
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button 
+                        type="button"
+                        onClick={() => selectDemoAccount('771234567', '1234')}
+                        className="w-full border border-slate-200 text-[10px] font-bold py-2 rounded-xl text-center transition-all active:scale-95 cursor-pointer bg-slate-50 text-slate-700 hover:bg-slate-100"
+                      >
+                        🚗 Moussa (v1)
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => selectDemoAccount('779876543', '5678')}
+                        className="w-full border border-slate-200 text-[10px] font-bold py-2 rounded-xl text-center transition-all active:scale-95 cursor-pointer bg-slate-50 text-slate-700 hover:bg-slate-100"
+                      >
+                        🚕 Amadou (v2)
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>

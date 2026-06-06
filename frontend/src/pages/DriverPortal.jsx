@@ -8,7 +8,6 @@ import {
   FileText, 
   AlertTriangle, 
   ShieldCheck, 
-  Volume2, 
   Mic, 
   Square, 
   Play, 
@@ -126,8 +125,7 @@ export default function DriverPortal() {
   // Dev Tools panel state
   const [showDevPanel, setShowDevPanel] = useState(false);
 
-  // Speech helper
-  const [voiceLang, setVoiceLang] = useState('fr'); // 'fr' or 'wo'
+
 
   // Notification helper
   const addNewNotification = (title, message, type = 'info') => {
@@ -281,18 +279,6 @@ export default function DriverPortal() {
     triggerToast("📸 Reçu enregistré", "Prévisualisation prête dans le récapitulatif.", 'success');
   };
 
-  // Text-To-Speech assistant
-  const speakGuide = (textFr, textWo) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const speakText = voiceLang === 'wo' ? textWo : textFr;
-      const utterance = new SpeechSynthesisUtterance(speakText);
-      utterance.lang = voiceLang === 'wo' ? 'en-US' : 'fr-FR';
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
   // Handle odometer check and recap verification
   const handleOpenRecap = (e) => {
     e.preventDefault();
@@ -300,7 +286,6 @@ export default function DriverPortal() {
 
     if (!mileage || !amount || (!ref && paymentMethod !== 'cash')) {
       setError("Veuillez remplir tous les champs requis.");
-      speakGuide("Veuillez remplir tous les champs requis pour déclarer.", "Mettez yé bindal sa kilométrage ak sa khaliss.");
       setTimeout(() => setError(''), 4000);
       return;
     }
@@ -310,10 +295,6 @@ export default function DriverPortal() {
 
     if (mileageNum <= lastMileage) {
       setError(`Kilométrage incorrect : ${mileageNum} km doit être supérieur à l'ancien index (${lastMileage} km).`);
-      speakGuide(
-        `Le kilométrage entré est inférieur ou égal à l'ancien enregistré de ${lastMileage} kilomètres.`,
-        `Kilométrage bi dangua dioum. Lim bi dougueul wara eup ${lastMileage} kilomètres.`
-      );
       setTimeout(() => setError(''), 5000);
       return;
     }
@@ -884,7 +865,6 @@ export default function DriverPortal() {
                   <div className="grid grid-cols-3 gap-3">
                     <button 
                       onClick={() => {
-                        speakGuide("Déclarer versement. Choisissez Wave, Orange Money ou Espèces. Prenez une photo du reçu.", "Dougal sa versement. Tannal Wave walla Orange Money. Natafal reçu bi.");
                         setActiveTab('declare');
                       }}
                       className="bg-white border border-slate-100 p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center shadow-xs active:scale-95 cursor-pointer hover:bg-slate-50 transition-colors"
@@ -994,47 +974,6 @@ export default function DriverPortal() {
           {activeTab === 'declare' && (
             <div className="space-y-4 animate-fadeIn">
               
-              {/* Voice Guide Speech Bubble */}
-              <div className="flex items-start gap-3 bg-[#6D4AFF]/5 border border-[#6D4AFF]/15 p-3.5 rounded-3xl relative text-left">
-                <button 
-                  type="button"
-                  onClick={() => speakGuide(
-                    "Sélectionnez Wave, Orange Money ou Espèces. Prenez une photo du reçu de paiement. Entrez le kilométrage de la voiture et validez.",
-                    "Tannal Wave walla Orange Money. Natafal reçu bi. Bindal kilométrage auto bi ba paré cuqal bouton vert bi."
-                  )}
-                  className="w-9 h-9 rounded-full bg-[#6D4AFF]/10 hover:bg-[#6D4AFF]/20 text-[#6D4AFF] flex items-center justify-center shrink-0 cursor-pointer"
-                >
-                  <Volume2 className="w-5 h-5" />
-                </button>
-                <div className="flex-1 space-y-1">
-                  <div className="flex justify-between items-center">
-                    <p className="text-[9px] font-bold text-[#6D4AFF] uppercase tracking-wider">Aide Vocale</p>
-                    <div className="flex gap-1">
-                      <button 
-                        type="button"
-                        onClick={() => setVoiceLang('fr')}
-                        className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${
-                          voiceLang === 'fr' ? 'bg-[#6D4AFF] text-white' : 'bg-slate-200 text-slate-500'
-                        }`}
-                      >
-                        FR
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={() => setVoiceLang('wo')}
-                        className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${
-                          voiceLang === 'wo' ? 'bg-[#6D4AFF] text-white' : 'bg-slate-200 text-slate-500'
-                        }`}
-                      >
-                        WO
-                      </button>
-                    </div>
-                  </div>
-                  <p className="text-[9.5px] font-semibold leading-normal text-slate-600">
-                    {voiceLang === 'wo' ? 'Tannal Wave walla Orange Money. Natafal reçu bi. Bindal kilométrage auto bi.' : 'Choisis ton opérateur. Prends en photo le reçu. Saisis ton kilométrage de fin de journée.'}
-                  </p>
-                </div>
-              </div>
 
               {error && (
                 <div className="bg-red-50 border border-red-200 text-[#EF4444] text-xs p-3 rounded-2xl flex gap-2 font-bold animate-fadeIn text-left">
@@ -1207,47 +1146,6 @@ export default function DriverPortal() {
           {activeTab === 'chat' && (
             <div className="space-y-4 animate-fadeIn">
               
-              {/* Voice Guide Speech Bubble */}
-              <div className="flex items-start gap-3 bg-[#6D4AFF]/5 border border-[#6D4AFF]/15 p-3.5 rounded-3xl relative text-left">
-                <button 
-                  type="button"
-                  onClick={() => speakGuide(
-                    "Cliquez sur le gros micro pour enregistrer un message vocal au propriétaire, ou appuyez sur un message rapide pour l'envoyer immédiatement.",
-                    "Cuqal micro bi ngir vocal walla message rapide yi ngir yone ko boss bi paré."
-                  )}
-                  className="w-9 h-9 rounded-full bg-[#6D4AFF]/10 hover:bg-[#6D4AFF]/20 text-[#6D4AFF] flex items-center justify-center shrink-0 cursor-pointer"
-                >
-                  <Volume2 className="w-5 h-5" />
-                </button>
-                <div className="flex-1 space-y-1">
-                  <div className="flex justify-between items-center">
-                    <p className="text-[9px] font-bold text-[#6D4AFF] uppercase tracking-wider">Aide Vocale</p>
-                    <div className="flex gap-1">
-                      <button 
-                        type="button"
-                        onClick={() => setVoiceLang('fr')}
-                        className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${
-                          voiceLang === 'fr' ? 'bg-[#6D4AFF] text-white' : 'bg-slate-200 text-slate-500'
-                        }`}
-                      >
-                        FR
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={() => setVoiceLang('wo')}
-                        className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${
-                          voiceLang === 'wo' ? 'bg-[#6D4AFF] text-white' : 'bg-slate-200 text-slate-500'
-                        }`}
-                      >
-                        WO
-                      </button>
-                    </div>
-                  </div>
-                  <p className="text-[9.5px] font-semibold leading-normal text-slate-600">
-                    {voiceLang === 'wo' ? 'Cuq micro bi ngir dougal vocal, walla émoji yi ngir yone message rapide.' : 'Parlez directement au patron par vocal ou messages rapides d\'un seul clic.'}
-                  </p>
-                </div>
-              </div>
 
               <div className="space-y-0.5 text-left">
                 <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Discuter avec le propriétaire</h4>
@@ -1537,27 +1435,6 @@ export default function DriverPortal() {
 
               {/* Settings links */}
               <div className="bg-white border border-slate-100 rounded-3xl p-2.5 shadow-xs text-left text-xs divide-y divide-slate-100">
-                <div className="p-3.5 flex justify-between items-center">
-                  <span className="font-semibold text-slate-700">Langue de l'aide vocale</span>
-                  <div className="flex gap-1.5">
-                    <button 
-                      onClick={() => setVoiceLang('fr')}
-                      className={`text-[9.5px] font-bold px-2 py-0.5 rounded transition-colors ${
-                        voiceLang === 'fr' ? 'bg-[#6D4AFF] text-white' : 'bg-slate-100 text-slate-500 border border-slate-200'
-                      }`}
-                    >
-                      FR
-                    </button>
-                    <button 
-                      onClick={() => setVoiceLang('wo')}
-                      className={`text-[9.5px] font-bold px-2 py-0.5 rounded transition-colors ${
-                        voiceLang === 'wo' ? 'bg-[#6D4AFF] text-white' : 'bg-slate-100 text-slate-500 border border-slate-200'
-                      }`}
-                    >
-                      WO 🇸🇳
-                    </button>
-                  </div>
-                </div>
 
                 <div className="p-3.5 flex justify-between items-center">
                   <span className="font-semibold text-slate-700">Thème Sombre</span>
