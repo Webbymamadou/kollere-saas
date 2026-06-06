@@ -45,20 +45,20 @@ const initialIncidents = [
 
 const initialDocuments = [
   // DK-3421-A — Peugeot 301 (v1)
-  { id: 'doc_v1_1', vehicle_id: 'v1', type: 'Assurance RCA Flotte',        expiry: '2026-12-31', status: 'valid',    file: 'assurance_dk3421a.pdf' },
-  { id: 'doc_v1_2', vehicle_id: 'v1', type: 'Carte Grise',                  expiry: '2029-03-15', status: 'valid',    file: 'cartegrise_dk3421a.pdf' },
-  { id: 'doc_v1_3', vehicle_id: 'v1', type: 'Licence Transport VTC',        expiry: '2026-09-10', status: 'expiring', file: 'licence_dk3421a.pdf' },
-  { id: 'doc_v1_4', vehicle_id: 'v1', type: 'Visite Technique Annuelle',    expiry: '2026-07-01', status: 'expiring', file: 'visite_dk3421a.pdf' },
+  { id: 'doc_v1_1', vehicle_id: 'v1', type: 'Assurance RCA Flotte',     expiry: '2026-12-31', file: 'assurance_dk3421a.pdf' },
+  { id: 'doc_v1_2', vehicle_id: 'v1', type: 'Carte Grise',               expiry: '2029-03-15', file: 'cartegrise_dk3421a.pdf' },
+  { id: 'doc_v1_3', vehicle_id: 'v1', type: 'Licence Transport VTC',     expiry: '2026-09-10', file: 'licence_dk3421a.pdf' },
+  { id: 'doc_v1_4', vehicle_id: 'v1', type: 'Visite Technique Annuelle', expiry: '2026-07-01', file: 'visite_dk3421a.pdf' },
   // DK-8854-B — Toyota Corolla (v2)
-  { id: 'doc_v2_1', vehicle_id: 'v2', type: 'Assurance RCA Flotte',        expiry: '2027-01-20', status: 'valid',    file: 'assurance_dk8854b.pdf' },
-  { id: 'doc_v2_2', vehicle_id: 'v2', type: 'Carte Grise',                  expiry: '2028-04-15', status: 'valid',    file: 'cartegrise_dk8854b.pdf' },
-  { id: 'doc_v2_3', vehicle_id: 'v2', type: 'Licence Transport VTC',        expiry: '2027-02-28', status: 'valid',    file: 'licence_dk8854b.pdf' },
-  { id: 'doc_v2_4', vehicle_id: 'v2', type: 'Visite Technique Annuelle',    expiry: '2026-06-25', status: 'expiring', file: 'visite_dk8854b.pdf' },
+  { id: 'doc_v2_1', vehicle_id: 'v2', type: 'Assurance RCA Flotte',     expiry: '2027-01-20', file: 'assurance_dk8854b.pdf' },
+  { id: 'doc_v2_2', vehicle_id: 'v2', type: 'Carte Grise',               expiry: '2028-04-15', file: 'cartegrise_dk8854b.pdf' },
+  { id: 'doc_v2_3', vehicle_id: 'v2', type: 'Licence Transport VTC',     expiry: '2027-02-28', file: 'licence_dk8854b.pdf' },
+  { id: 'doc_v2_4', vehicle_id: 'v2', type: 'Visite Technique Annuelle', expiry: '2026-06-25', file: 'visite_dk8854b.pdf' },
   // DK-9921-C — Hyundai Accent (v3)
-  { id: 'doc_v3_1', vehicle_id: 'v3', type: 'Assurance RCA Flotte',        expiry: '2026-08-05', status: 'expiring', file: 'assurance_dk9921c.pdf' },
-  { id: 'doc_v3_2', vehicle_id: 'v3', type: 'Carte Grise',                  expiry: '2027-11-30', status: 'valid',    file: 'cartegrise_dk9921c.pdf' },
-  { id: 'doc_v3_3', vehicle_id: 'v3', type: 'Licence Transport VTC',        expiry: '2026-08-20', status: 'expiring', file: 'licence_dk9921c.pdf' },
-  { id: 'doc_v3_4', vehicle_id: 'v3', type: 'Visite Technique Annuelle',    expiry: '2027-05-12', status: 'valid',    file: 'visite_dk9921c.pdf' },
+  { id: 'doc_v3_1', vehicle_id: 'v3', type: 'Assurance RCA Flotte',     expiry: '2026-08-05', file: 'assurance_dk9921c.pdf' },
+  { id: 'doc_v3_2', vehicle_id: 'v3', type: 'Carte Grise',               expiry: '2027-11-30', file: 'cartegrise_dk9921c.pdf' },
+  { id: 'doc_v3_3', vehicle_id: 'v3', type: 'Licence Transport VTC',     expiry: '2026-08-20', file: 'licence_dk9921c.pdf' },
+  { id: 'doc_v3_4', vehicle_id: 'v3', type: 'Visite Technique Annuelle', expiry: '2027-05-12', file: 'visite_dk9921c.pdf' },
 ];
 
 const initialAudits = [

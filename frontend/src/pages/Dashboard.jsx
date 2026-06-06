@@ -432,10 +432,18 @@ export default function Dashboard() {
     { id: 'c_6', driver: 'Ibrahima Ndiaye', vehicle: 'DK-9921-C', date: '2026-06-05', time: '19:30', route: 'Ngor ➔ Point E', amount: 6200, status: 'completed', platform: 'Heetch' }
   ];
 
+  // Calcule le statut d'un document en temps réel à partir de sa date d'expiration
+  // Retourne: { label, color, daysLeft, isExpired, isExpiring, isValid }
+  const getDocStatus = (expiry) => {
+    const daysLeft = Math.ceil((new Date(expiry) - new Date()) / (1000 * 60 * 60 * 24));
+    if (daysLeft <= 0)  return { label: 'Expiré',       color: '#EF4444', daysLeft, isExpired: true,  isExpiring: false, isValid: false };
+    if (daysLeft <= 60) return { label: 'Bientôt expiré', color: '#D97706', daysLeft, isExpired: false, isExpiring: true,  isValid: false };
+    return               { label: 'Valide',           color: '#16A34A', daysLeft, isExpired: false, isExpiring: false, isValid: true  };
+  };
+
   // Génère et télécharge un PDF HTML pour un document administratif
   const handleDownloadDocPdf = (doc) => {
-    const statusLabel = doc.status === 'expiring' ? 'Expirera bientôt' : 'Valide';
-    const statusColor = doc.status === 'expiring' ? '#D97706' : '#16A34A';
+    const { label: statusLabel, color: statusColor } = getDocStatus(doc.expiry);
     const today = new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
 
     const htmlContent = `<!DOCTYPE html>
@@ -1899,10 +1907,10 @@ export default function Dashboard() {
                   <p className="text-xs text-slate-500 font-semibold">Pièces administratives de chaque véhicule — assurance, carte grise, licence VTC, visite technique.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {documents.filter(d => d.status === 'expiring').length > 0 && (
+                  {documents.filter(d => !getDocStatus(d.expiry).isValid).length > 0 && (
                     <span className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-[9.5px] font-extrabold px-3 py-1.5 rounded-xl">
                       <AlertTriangle className="w-3.5 h-3.5" />
-                      {documents.filter(d => d.status === 'expiring').length} document(s) à renouveler
+                      {documents.filter(d => !getDocStatus(d.expiry).isValid).length} document(s) à renouveler
                     </span>
                   )}
                 </div>
@@ -1913,7 +1921,7 @@ export default function Dashboard() {
                 {vehicles.map((v) => {
                   const vehicleDocs = documents.filter(d => d.vehicle_id === v.id);
                   const driver = drivers.find(d => d.id === v.driver_id);
-                  const hasAlert = vehicleDocs.some(d => d.status === 'expiring');
+                  const hasAlert = vehicleDocs.some(d => !getDocStatus(d.expiry).isValid);
 
                   return (
                     <div key={v.id} className={`bg-white border rounded-2xl shadow-sm overflow-hidden ${hasAlert ? 'border-amber-200' : 'border-slate-100'}`}>
@@ -1943,19 +1951,19 @@ export default function Dashboard() {
                       {/* Grille des 4 documents */}
                       <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-slate-100">
                         {vehicleDocs.map((doc) => {
-                          const isExpiring = doc.status === 'expiring';
-                          // Calculer les jours restants
-                          const daysLeft = Math.ceil((new Date(doc.expiry) - new Date()) / (1000 * 60 * 60 * 24));
-                          const isUrgent = daysLeft <= 30;
+                          const { label: docLabel, isExpired, isExpiring, isValid, daysLeft } = getDocStatus(doc.expiry);
+                          const isUrgent = !isValid;
 
                           return (
-                            <div key={doc.id} className={`p-4 flex flex-col gap-3 ${isExpiring ? 'bg-amber-50/30' : ''}`}>
+                            <div key={doc.id} className={`p-4 flex flex-col gap-3 ${isExpiring || isExpired ? 'bg-amber-50/30' : ''}`}>
                               <div className="space-y-1.5">
                                 <div className="flex items-start justify-between gap-1">
                                   <span className={`inline-block px-1.5 py-0.5 rounded text-[8.5px] font-extrabold uppercase ${
-                                    isExpiring ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                                    isExpired  ? 'bg-red-100 text-red-600 border border-red-200' :
+                                    isExpiring ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                                                 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                                   }`}>
-                                    {isExpiring ? '⚠ Bientôt' : '✓ Valide'}
+                                    {isExpired ? '✕ Expiré' : isExpiring ? '⚠ Bientôt' : '✓ Valide'}
                                   </span>
                                 </div>
                                 <h5 className="text-[10.5px] font-bold text-slate-800 leading-tight">{doc.type}</h5>
@@ -1968,8 +1976,8 @@ export default function Dashboard() {
                                   <span className="font-mono">{doc.expiry}</span>
                                 </div>
                                 {isUrgent && (
-                                  <div className="text-[8.5px] font-bold text-red-500">
-                                    {daysLeft <= 0 ? 'Expiré !' : `J-${daysLeft} jours`}
+                                  <div className={`text-[8.5px] font-bold ${isExpired ? 'text-red-600' : 'text-amber-600'}`}>
+                                    {isExpired ? `Expiré depuis ${Math.abs(daysLeft)} j` : `J-${daysLeft} jours`}
                                   </div>
                                 )}
                                 <button
