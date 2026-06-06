@@ -74,6 +74,7 @@ export default function Dashboard() {
     return getFromDb('maintenances', initialMaintenances);
   });
   const [incidents, setIncidents] = useState(() => getFromDb('incidents', []));
+  const [documents, setDocuments] = useState(() => getFromDb('documents', []));
   const [fleetName, setFleetName] = useState(() => {
     const profile = localStorage.getItem('verse_owner_profile');
     if (profile) {
@@ -429,14 +430,6 @@ export default function Dashboard() {
     { id: 'c_4', driver: 'Ibrahima Ndiaye', vehicle: 'DK-9921-C', date: '2026-06-06', time: '10:15', route: 'Liberté 6 ➔ Parcelles', amount: 4500, status: 'completed', platform: 'Yassir' },
     { id: 'c_5', driver: 'Amadou Sow', vehicle: 'DK-8854-B', date: '2026-06-06', time: '11:45', route: 'Fann ➔ Thiaroye', amount: 9500, status: 'completed', platform: 'Yango' },
     { id: 'c_6', driver: 'Ibrahima Ndiaye', vehicle: 'DK-9921-C', date: '2026-06-05', time: '19:30', route: 'Ngor ➔ Point E', amount: 6200, status: 'completed', platform: 'Heetch' }
-  ];
-
-  // Documents Mock data
-  const mockDocuments = [
-    { id: 'doc_1', type: 'Assurance RCA Flotte', vehicle: 'DK-3421-A', expiry: '2026-12-31', status: 'valid', file: 'assurance_dk3421a.pdf' },
-    { id: 'doc_2', type: 'Carte Grise Temporaire', vehicle: 'DK-8854-B', expiry: '2028-04-15', status: 'valid', file: 'cartegrise_dk8854b.pdf' },
-    { id: 'doc_3', type: 'Licence Transport VTC', vehicle: 'DK-9921-C', expiry: '2026-08-20', status: 'expiring', file: 'licence_dk9921c.pdf' },
-    { id: 'doc_4', type: 'Visite Technique Annuelle', vehicle: 'DK-3421-A', expiry: '2026-06-25', status: 'expiring', file: 'controtech_dk3421a.pdf' }
   ];
 
   // Génère et télécharge un PDF HTML pour un document administratif
@@ -1906,43 +1899,101 @@ export default function Dashboard() {
           {/* ----------------- TAB: DOCUMENTS ----------------- */}
           {activeTab === 'documents' && (
             <div className="space-y-6 animate-fade-in">
-              <div>
-                <h2 className="text-base font-black text-slate-900">Portefeuille de Documents</h2>
-                <p className="text-xs text-slate-500 font-semibold">Gérez les pièces administratives de vos véhicules (assurances, contrôles techniques, licences).</p>
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-base font-black text-slate-900">Portefeuille de Documents</h2>
+                  <p className="text-xs text-slate-500 font-semibold">Pièces administratives de chaque véhicule — assurance, carte grise, licence VTC, visite technique.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {documents.filter(d => d.status === 'expiring').length > 0 && (
+                    <span className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-[9.5px] font-extrabold px-3 py-1.5 rounded-xl">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      {documents.filter(d => d.status === 'expiring').length} document(s) à renouveler
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* Documents grid */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {mockDocuments.map((doc) => {
-                  const isExpiring = doc.status === 'expiring';
+              {/* Un bloc par véhicule */}
+              <div className="space-y-6">
+                {vehicles.map((v) => {
+                  const vehicleDocs = documents.filter(d => d.vehicle_id === v.id);
+                  const driver = drivers.find(d => d.id === v.driver_id);
+                  const hasAlert = vehicleDocs.some(d => d.status === 'expiring');
+
                   return (
-                    <div key={doc.id} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-4 hover:shadow-md transition-all flex flex-col justify-between h-48">
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-start">
-                          <span className="text-[9px] bg-slate-100 text-slate-500 font-extrabold px-2 py-0.5 rounded font-mono">
-                            {doc.vehicle}
-                          </span>
-                          <span className={`inline-block px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase ${
-                            isExpiring ? 'bg-amber-50 text-amber-700 border border-amber-250/30' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                          }`}>
-                            {isExpiring ? 'Expirera bientôt' : 'Valide'}
-                          </span>
+                    <div key={v.id} className={`bg-white border rounded-2xl shadow-sm overflow-hidden ${hasAlert ? 'border-amber-200' : 'border-slate-100'}`}>
+                      {/* En-tête véhicule */}
+                      <div className={`px-5 py-3.5 flex justify-between items-center border-b ${hasAlert ? 'bg-amber-50/50 border-amber-100' : 'bg-slate-50/70 border-slate-100'}`}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-[#6D4AFF]/10 flex items-center justify-center">
+                            <FileText className="w-4 h-4 text-[#6D4AFF]" />
+                          </div>
+                          <div>
+                            <span className="text-xs font-extrabold text-slate-900">{v.brand_model}</span>
+                            <span className="text-[9px] font-mono font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded ml-2">{v.license_plate}</span>
+                          </div>
                         </div>
-                        <h4 className="text-xs font-bold text-slate-800">{doc.type}</h4>
-                        <p className="text-[10px] text-slate-400 font-semibold">Fichier : {doc.file}</p>
+                        <div className="flex items-center gap-2">
+                          {driver && (
+                            <span className="text-[9.5px] text-slate-500 font-semibold">{driver.name}</span>
+                          )}
+                          {hasAlert && (
+                            <span className="flex items-center gap-1 bg-amber-100 text-amber-700 text-[9px] font-extrabold px-2 py-0.5 rounded-lg border border-amber-200">
+                              <AlertTriangle className="w-3 h-3" /> Attention
+                            </span>
+                          )}
+                        </div>
                       </div>
 
-                      <div className="space-y-3">
-                        <div className="flex justify-between text-[9px] font-bold text-slate-500 border-t border-slate-50 pt-3">
-                          <span>Date d'expiration :</span>
-                          <span className="font-mono text-slate-800">{doc.expiry}</span>
-                        </div>
-                        <button 
-                          onClick={() => handleDownloadDocPdf(doc)}
-                          className="w-full bg-slate-50 hover:bg-[#6D4AFF] hover:text-white text-slate-650 text-[9.5px] font-bold py-1.5 rounded-lg border border-slate-200/50 hover:border-[#6D4AFF] transition-all cursor-pointer flex items-center justify-center gap-1.5">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                          Télécharger (PDF)
-                        </button>
+                      {/* Grille des 4 documents */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-slate-100">
+                        {vehicleDocs.map((doc) => {
+                          const isExpiring = doc.status === 'expiring';
+                          // Calculer les jours restants
+                          const daysLeft = Math.ceil((new Date(doc.expiry) - new Date()) / (1000 * 60 * 60 * 24));
+                          const isUrgent = daysLeft <= 30;
+
+                          return (
+                            <div key={doc.id} className={`p-4 flex flex-col gap-3 ${isExpiring ? 'bg-amber-50/30' : ''}`}>
+                              <div className="space-y-1.5">
+                                <div className="flex items-start justify-between gap-1">
+                                  <span className={`inline-block px-1.5 py-0.5 rounded text-[8.5px] font-extrabold uppercase ${
+                                    isExpiring ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                                  }`}>
+                                    {isExpiring ? '⚠ Bientôt' : '✓ Valide'}
+                                  </span>
+                                </div>
+                                <h5 className="text-[10.5px] font-bold text-slate-800 leading-tight">{doc.type}</h5>
+                                <p className="text-[9px] text-slate-400 font-mono">{doc.file}</p>
+                              </div>
+
+                              <div className="mt-auto space-y-2">
+                                <div className={`text-[9px] font-bold flex items-center gap-1 ${isUrgent ? 'text-amber-600' : 'text-slate-500'}`}>
+                                  <span>Expire :</span>
+                                  <span className="font-mono">{doc.expiry}</span>
+                                </div>
+                                {isUrgent && (
+                                  <div className="text-[8.5px] font-bold text-red-500">
+                                    {daysLeft <= 0 ? 'Expiré !' : `J-${daysLeft} jours`}
+                                  </div>
+                                )}
+                                <button
+                                  onClick={() => handleDownloadDocPdf({ ...doc, vehicle: v.license_plate })}
+                                  className="w-full bg-slate-50 hover:bg-[#6D4AFF] hover:text-white text-slate-600 text-[8.5px] font-bold py-1 rounded-lg border border-slate-200 hover:border-[#6D4AFF] transition-all cursor-pointer flex items-center justify-center gap-1"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                  Télécharger
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {vehicleDocs.length === 0 && (
+                          <div className="col-span-4 py-8 text-center text-xs text-slate-400 font-bold italic">
+                            Aucun document enregistré pour ce véhicule.
+                          </div>
+                        )}
                       </div>
                     </div>
                   );

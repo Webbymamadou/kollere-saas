@@ -46,6 +46,24 @@ const initialIncidents = [
   { id: 'i1', driver_name: 'Ibrahima Ndiaye', vehicle_plate: 'DK-9921-C', type: 'engine', description: 'Voyant moteur allumé et perte de puissance', date: '2026-06-05 14:30', status: 'pending' }
 ];
 
+const initialDocuments = [
+  // DK-3421-A — Peugeot 301 (v1)
+  { id: 'doc_v1_1', vehicle_id: 'v1', type: 'Assurance RCA Flotte',        expiry: '2026-12-31', status: 'valid',    file: 'assurance_dk3421a.pdf' },
+  { id: 'doc_v1_2', vehicle_id: 'v1', type: 'Carte Grise',                  expiry: '2029-03-15', status: 'valid',    file: 'cartegrise_dk3421a.pdf' },
+  { id: 'doc_v1_3', vehicle_id: 'v1', type: 'Licence Transport VTC',        expiry: '2026-09-10', status: 'expiring', file: 'licence_dk3421a.pdf' },
+  { id: 'doc_v1_4', vehicle_id: 'v1', type: 'Visite Technique Annuelle',    expiry: '2026-07-01', status: 'expiring', file: 'visite_dk3421a.pdf' },
+  // DK-8854-B — Toyota Corolla (v2)
+  { id: 'doc_v2_1', vehicle_id: 'v2', type: 'Assurance RCA Flotte',        expiry: '2027-01-20', status: 'valid',    file: 'assurance_dk8854b.pdf' },
+  { id: 'doc_v2_2', vehicle_id: 'v2', type: 'Carte Grise',                  expiry: '2028-04-15', status: 'valid',    file: 'cartegrise_dk8854b.pdf' },
+  { id: 'doc_v2_3', vehicle_id: 'v2', type: 'Licence Transport VTC',        expiry: '2027-02-28', status: 'valid',    file: 'licence_dk8854b.pdf' },
+  { id: 'doc_v2_4', vehicle_id: 'v2', type: 'Visite Technique Annuelle',    expiry: '2026-06-25', status: 'expiring', file: 'visite_dk8854b.pdf' },
+  // DK-9921-C — Hyundai Accent (v3)
+  { id: 'doc_v3_1', vehicle_id: 'v3', type: 'Assurance RCA Flotte',        expiry: '2026-08-05', status: 'expiring', file: 'assurance_dk9921c.pdf' },
+  { id: 'doc_v3_2', vehicle_id: 'v3', type: 'Carte Grise',                  expiry: '2027-11-30', status: 'valid',    file: 'cartegrise_dk9921c.pdf' },
+  { id: 'doc_v3_3', vehicle_id: 'v3', type: 'Licence Transport VTC',        expiry: '2026-08-20', status: 'expiring', file: 'licence_dk9921c.pdf' },
+  { id: 'doc_v3_4', vehicle_id: 'v3', type: 'Visite Technique Annuelle',    expiry: '2027-05-12', status: 'valid',    file: 'visite_dk9921c.pdf' },
+];
+
 const initialAudits = [
   { id: 'au1', date: '2026-06-05 07:12', type: 'login', driver_name: 'Moussa Diop', details: 'Connexion réussie via Magic Link' },
   { id: 'au2', date: '2026-06-05 21:05', type: 'payment_declared', driver_name: 'Moussa Diop', details: 'Déclaration versement 15,000 FCFA (Wave)' }
@@ -61,7 +79,8 @@ export const getFromDb = (key, fallback) => {
     drivers: initialDrivers,
     payments: initialPayments,
     incidents: initialIncidents,
-    audits: initialAudits
+    audits: initialAudits,
+    documents: initialDocuments
   };
   
   const defaultFallback = fallbacks[key] !== undefined ? fallbacks[key] : fallback;
@@ -79,6 +98,7 @@ export const initDb = () => {
   getFromDb('payments', initialPayments);
   getFromDb('incidents', initialIncidents);
   getFromDb('audits', initialAudits);
+  getFromDb('documents', initialDocuments);
 };
 
 // Eagerly initialize the database on module import to ensure it is populated
