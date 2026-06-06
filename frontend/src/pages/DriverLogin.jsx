@@ -317,23 +317,8 @@ export default function DriverLogin() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col items-center justify-center p-0 sm:p-6 select-none font-sans relative overflow-hidden transition-colors duration-300 ${
-      darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'
-    }`}>
+    <div className="min-h-screen flex flex-col items-center justify-center p-0 sm:p-6 select-none font-sans relative overflow-hidden bg-slate-50 text-slate-800">
       
-      {/* Background blobs for premium 2026 feel */}
-      {darkMode ? (
-        <>
-          <div className="absolute top-[-10%] left-[-10%] w-[350px] h-[350px] bg-[#6D4AFF]/15 rounded-full blur-[100px] pointer-events-none"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[350px] h-[350px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none"></div>
-        </>
-      ) : (
-        <>
-          <div className="absolute top-[-10%] left-[-10%] w-[350px] h-[350px] bg-[#6D4AFF]/5 rounded-full blur-[90px] pointer-events-none"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[350px] h-[350px] bg-slate-200/50 rounded-full blur-[90px] pointer-events-none"></div>
-        </>
-      )}
-
       {/* Styles for shake and keyframes */}
       <style>{`
         @keyframes shake {
@@ -351,120 +336,85 @@ export default function DriverLogin() {
         .animate-sms-toast {
           animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        @keyframes pulseGlow {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.6; }
-        }
-        .pulse-glow {
-          animation: pulseGlow 2s infinite ease-in-out;
-        }
       `}</style>
 
       {/* --- WHATSAPP SIMULATED SMS TOAST --- */}
       {smsNotification && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 w-[92%] max-w-xs bg-slate-900 border border-white/10 text-white rounded-3xl p-4 shadow-2xl z-50 flex gap-3.5 animate-sms-toast">
-          <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 w-[92%] max-w-xs bg-white border border-slate-200 text-slate-900 rounded-3xl p-4 shadow-xl z-50 flex gap-3.5 animate-sms-toast">
+          <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
             <MessageSquareCode className="w-5 h-5" />
           </div>
           <div className="flex-1 space-y-0.5">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-400">SMS Réseau</span>
-              <span className="text-[8px] text-slate-500 font-mono">À l'instant</span>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-650">SMS Réseau</span>
+              <span className="text-[8px] text-slate-400 font-mono">À l'instant</span>
             </div>
-            <p className="text-[11.5px] font-bold text-slate-100 leading-normal select-all">{smsNotification.body}</p>
+            <p className="text-[11.5px] font-semibold text-slate-800 leading-normal select-all">{smsNotification.body}</p>
           </div>
         </div>
       )}
 
       {/* Magic link loading overlay */}
       {validatingToken && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex flex-col items-center justify-center text-center p-6">
+        <div className="fixed inset-0 bg-[#F8FAFC]/95 backdrop-blur-md z-50 flex flex-col items-center justify-center text-center p-6">
           <div className="w-20 h-20 rounded-full bg-[#6D4AFF]/10 border border-[#6D4AFF]/20 flex items-center justify-center mb-6">
             <Loader2 className="w-8 h-8 text-[#6D4AFF] animate-spin" />
           </div>
-          <h3 className="text-lg font-black text-white">Validation de l'accès...</h3>
-          <p className="text-xs text-slate-400 mt-2 max-w-[240px] font-semibold leading-relaxed">
+          <h3 className="text-lg font-bold text-slate-900">Validation de l'accès...</h3>
+          <p className="text-xs text-slate-500 mt-2 max-w-[240px] font-semibold leading-relaxed">
             Connexion sécurisée en cours. Veuillez ne pas fermer l'application.
           </p>
         </div>
       )}
 
       {/* Smartphone frame container */}
-      <div className={`w-full h-full min-h-screen sm:min-h-[720px] sm:max-w-[390px] overflow-hidden sm:shadow-2xl relative flex flex-col sm:border-[8px] transition-all duration-300 ${
-        darkMode 
-          ? 'bg-[#090D16] sm:border-slate-800 sm:rounded-[50px] shadow-black/80' 
-          : 'bg-white sm:border-slate-250 sm:rounded-[50px] shadow-slate-300/40'
-      }`}>
+      <div className="w-full h-full min-h-screen sm:min-h-[740px] sm:max-w-[390px] overflow-hidden sm:shadow-2xl relative flex flex-col sm:border-[8px] sm:border-slate-250 sm:rounded-[50px] bg-[#F8FAFC] text-[#0F172A] shadow-slate-300/40">
         
         {/* Phone Notch */}
-        <div className={`hidden sm:flex h-5.5 w-32 mx-auto rounded-b-2xl absolute top-0 left-1/2 -translate-x-1/2 z-40 items-center justify-center ${
-          darkMode ? 'bg-slate-800' : 'bg-slate-200'
-        }`}>
+        <div className="hidden sm:flex h-5.5 w-32 mx-auto rounded-b-2xl absolute top-0 left-1/2 -translate-x-1/2 z-40 items-center justify-center bg-slate-200">
           <span className="w-3 h-3 rounded-full bg-black/95 block mr-3"></span>
           <span className="w-8 h-1 rounded bg-black/20 block"></span>
         </div>
 
         {/* Status Bar */}
-        <div className={`pt-3 sm:pt-6 px-6 pb-2 flex justify-between items-center text-[10px] font-mono z-30 font-extrabold ${
-          darkMode ? 'text-slate-400 bg-slate-900/10' : 'text-slate-500 bg-slate-50/10'
-        }`}>
+        <div className="pt-3 sm:pt-6 px-6 pb-2 flex justify-between items-center text-[10px] font-mono z-30 font-semibold text-slate-500 bg-[#F8FAFC]">
           <span>19:58</span>
           <div className="flex gap-2 items-center">
             <span>Orange SN 4G</span>
-            <div className={`w-5.5 h-2.5 border rounded-sm p-0.5 flex ${darkMode ? 'border-slate-700' : 'border-slate-300'}`}>
+            <div className="w-5.5 h-2.5 border border-slate-350 rounded-sm p-0.5 flex">
               <div className="bg-emerald-500 h-full w-4/5 rounded-2xs"></div>
             </div>
           </div>
         </div>
 
         {/* Smartphone Screen Body */}
-        <div className="flex-1 flex flex-col justify-between p-6 relative overflow-y-auto">
+        <div className="flex-1 flex flex-col justify-between p-6 relative overflow-y-auto bg-[#F8FAFC]">
           
           {/* Top header navigation inside smartphone */}
-          <div className="relative z-20 flex items-center justify-between mt-2">
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className={`w-9 h-9 rounded-2xl flex items-center justify-center border transition-all cursor-pointer ${
-                darkMode 
-                  ? 'bg-white/5 border-white/10 text-amber-300 hover:bg-white/10' 
-                  : 'bg-slate-100 border-slate-200 text-[#6D4AFF] hover:bg-slate-200'
-              }`}
-              title={darkMode ? 'Basculer en Mode Clair' : 'Basculer en Mode Sombre'}
-            >
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-
-            <span className={`text-[10px] font-mono border px-3.5 py-1 rounded-full uppercase tracking-wider font-extrabold ${
-              darkMode 
-                ? 'bg-[#6D4AFF]/10 text-[#6D4AFF] border-[#6D4AFF]/20' 
-                : 'bg-[#6D4AFF]/5 text-[#6D4AFF] border-[#6D4AFF]/10'
-            }`}>
+          <div className="relative z-20 flex items-center justify-center mt-2">
+            <span className="text-[11px] font-semibold border border-[#6D4AFF]/20 px-3.5 py-1 rounded-full uppercase tracking-wider bg-[#6D4AFF]/5 text-[#6D4AFF]">
               🚖 Versé Chauffeur
             </span>
           </div>
 
           {/* Form Container */}
-          <div className={`relative z-20 flex-1 flex flex-col justify-center my-auto py-6 space-y-6 ${shake ? 'shake-element' : ''}`}>
+          <div className={`relative z-20 flex-1 flex flex-col justify-center my-auto py-6 space-y-5 ${shake ? 'shake-element' : ''}`}>
             
-            <div className="text-center space-y-2">
-              <div className={`w-14 h-14 rounded-3xl flex items-center justify-center mx-auto mb-2 border transition-colors ${
-                darkMode 
-                  ? 'bg-[#6D4AFF]/10 text-[#6D4AFF] border-[#6D4AFF]/25' 
-                  : 'bg-[#6D4AFF]/5 text-[#6D4AFF] border-[#6D4AFF]/15'
-              }`}>
-                {loginMode === 'pin' ? <Lock className="w-6 h-6" /> : <KeyRound className="w-6 h-6" />}
+            <div className="text-center space-y-1">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 bg-[#6D4AFF]/5 text-[#6D4AFF]">
+                {loginMode === 'pin' ? <Lock className="w-5.5 h-5.5" /> : <KeyRound className="w-5.5 h-5.5" />}
               </div>
-              <h2 className={`text-xl font-black tracking-tight ${darkMode ? 'text-white' : 'text-slate-800'}`}>
+              <h2 className="text-lg font-bold tracking-tight text-slate-900">
                 Espace Chauffeur
               </h2>
-              <p className={`text-xs max-w-[260px] mx-auto ${darkMode ? 'text-slate-400' : 'text-slate-500'} font-semibold leading-relaxed`}>
+              <p className="text-xs max-w-[260px] mx-auto text-slate-500 font-medium leading-relaxed">
                 Connectez-vous pour transmettre vos versements et trajets journaliers.
               </p>
             </div>
 
             {/* Error notifications */}
             {(error || magicLinkError) && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 rounded-2xl flex gap-2.5 font-bold animate-fadeIn">
+              <div className="bg-red-50 border border-red-200 text-red-650 text-xs p-3 rounded-2xl flex gap-2.5 font-semibold animate-fadeIn">
                 <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
                 <span className="leading-snug">{error || magicLinkError}</span>
               </div>
@@ -472,19 +422,17 @@ export default function DriverLogin() {
 
             {/* Lockout status indicator */}
             {lockoutTime > 0 && (
-              <div className="bg-amber-500/10 border border-amber-500/25 text-amber-500 text-xs p-3.5 rounded-2xl flex flex-col gap-1 items-center text-center font-bold">
-                <ShieldAlert className="w-5 h-5 animate-pulse" />
+              <div className="bg-amber-50 border border-amber-200 text-amber-850 text-xs p-3.5 rounded-2xl flex flex-col gap-1 items-center text-center font-semibold">
+                <ShieldAlert className="w-5 h-5 text-amber-500 animate-pulse" />
                 <span>Clavier verrouillé pour des raisons de sécurité</span>
-                <span className="text-[10px] text-slate-400">Veuillez patienter : <strong className="font-mono text-amber-400 text-xs">{lockoutTime}s</strong></span>
+                <span className="text-[10px] text-slate-500">Veuillez patienter : <strong className="font-mono text-amber-600 text-xs">{lockoutTime}s</strong></span>
               </div>
             )}
 
             {/* Bilingual Voice Assistance Widget */}
-            <div className={`border p-3.5 rounded-2xl flex flex-col gap-2 transition-colors ${
-              darkMode ? 'bg-white/[0.02] border-white/5' : 'bg-slate-100/60 border-slate-200'
-            }`}>
+            <div className="bg-white border border-slate-100 p-3.5 rounded-2xl flex flex-col gap-2 shadow-sm">
               <div className="flex justify-between items-center">
-                <span className={`text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 ${darkMode ? 'text-[#6D4AFF]' : 'text-[#6D4AFF]'}`}>
+                <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-[#6D4AFF]">
                   <Volume2 className="w-4 h-4 animate-bounce" /> Aide vocale / Assistant
                 </span>
                 
@@ -492,20 +440,20 @@ export default function DriverLogin() {
                 <div className="flex gap-1">
                   <button 
                     onClick={() => setVoiceLang('fr')}
-                    className={`text-[9px] font-bold px-2 py-0.5 rounded ${
+                    className={`text-[9px] font-bold px-2 py-0.5 rounded transition-colors ${
                       voiceLang === 'fr' 
                         ? 'bg-[#6D4AFF] text-white' 
-                        : 'bg-white/5 text-slate-400 border border-slate-200/10'
+                        : 'bg-slate-100 text-slate-500 border border-slate-200'
                     }`}
                   >
                     Français
                   </button>
                   <button 
                     onClick={() => setVoiceLang('wo')}
-                    className={`text-[9px] font-bold px-2 py-0.5 rounded ${
+                    className={`text-[9px] font-bold px-2 py-0.5 rounded transition-colors ${
                       voiceLang === 'wo' 
                         ? 'bg-[#6D4AFF] text-white' 
-                        : 'bg-white/5 text-slate-400 border border-slate-200/10'
+                        : 'bg-slate-100 text-slate-500 border border-slate-200'
                     }`}
                   >
                     Wolof 🇸🇳
@@ -516,9 +464,7 @@ export default function DriverLogin() {
               <button
                 type="button"
                 onClick={triggerCurrentVoiceGuide}
-                className={`w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
-                  darkMode ? 'bg-[#6D4AFF]/10 text-[#6D4AFF] hover:bg-[#6D4AFF]/20' : 'bg-[#6D4AFF]/5 text-[#6D4AFF] hover:bg-[#6D4AFF]/10'
-                }`}
+                className="w-full py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-[#6D4AFF]/5 text-[#6D4AFF] hover:bg-[#6D4AFF]/10 cursor-pointer"
               >
                 🔊 Écouter les instructions
               </button>
@@ -526,7 +472,7 @@ export default function DriverLogin() {
 
             {/* Login Fields Form */}
             {loginMode === 'pin' ? (
-              <form onSubmit={handlePinLogin} className="space-y-3.5">
+              <form onSubmit={handlePinLogin} className="space-y-3">
                 <div className="space-y-1">
                   <div className="relative">
                     <input 
@@ -534,14 +480,10 @@ export default function DriverLogin() {
                       value={phone}
                       disabled={lockoutTime > 0}
                       onChange={(e) => setPhone(e.target.value)}
-                      className={`w-full border-2 rounded-2xl px-4 py-4 text-xs focus:outline-none focus:ring-1 focus:ring-[#6D4AFF]/20 transition-all font-mono placeholder-slate-500 text-center tracking-wider font-extrabold disabled:opacity-40 min-h-[56px] ${
-                        darkMode 
-                          ? 'bg-slate-950 border-white/10 text-white focus:border-[#6D4AFF] focus:bg-slate-900' 
-                          : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-[#6D4AFF] focus:bg-white'
-                      }`}
+                      className="w-full border border-slate-200 rounded-2xl px-4 py-3.5 text-xs focus:outline-none focus:border-[#6D4AFF] focus:bg-white transition-all font-mono placeholder-slate-400 text-center tracking-wider font-semibold disabled:opacity-40 min-h-[48px] bg-slate-50 text-slate-800"
                       placeholder="Téléphone (ex: 771234567)"
                     />
-                    <Smartphone className="w-4 h-4 text-slate-500 absolute left-4 top-4.5" />
+                    <Smartphone className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
                   </div>
                 </div>
 
@@ -555,20 +497,16 @@ export default function DriverLogin() {
                       value={pin}
                       disabled={lockoutTime > 0}
                       onChange={(e) => setPin(e.target.value)}
-                      className={`w-full border-2 rounded-2xl px-4 py-4 text-xs focus:outline-none focus:ring-1 focus:ring-[#6D4AFF]/20 transition-all font-mono tracking-widest text-center placeholder-slate-500 font-extrabold disabled:opacity-40 min-h-[56px] ${
-                        darkMode 
-                          ? 'bg-slate-950 border-white/10 text-white focus:border-[#6D4AFF] focus:bg-slate-900' 
-                          : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-[#6D4AFF] focus:bg-white'
-                      }`}
+                      className="w-full border border-slate-200 rounded-2xl px-4 py-3.5 text-xs focus:outline-none focus:border-[#6D4AFF] focus:bg-white transition-all font-mono tracking-widest text-center placeholder-slate-400 font-semibold disabled:opacity-40 min-h-[48px] bg-slate-50 text-slate-800"
                       placeholder="Code PIN à 4 chiffres"
                     />
-                    <Lock className="w-4 h-4 text-slate-500 absolute left-4 top-4.5" />
+                    <Lock className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
                     <button
                       type="button"
                       onClick={() => setShowPin(!showPin)}
-                      className="absolute right-4 top-4 text-slate-500 hover:text-[#6D4AFF]"
+                      className="absolute right-4 top-3 text-slate-400 hover:text-[#6D4AFF]"
                     >
-                      {showPin ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
+                      {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
@@ -576,15 +514,15 @@ export default function DriverLogin() {
                 <button 
                   type="submit"
                   disabled={lockoutTime > 0}
-                  className="w-full bg-[#6D4AFF] hover:bg-[#5636E5] text-white font-black text-xs py-4 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-[#6D4AFF]/10 active:scale-[0.97] min-h-[56px] disabled:opacity-40"
+                  className="w-full bg-[#6D4AFF] hover:bg-[#5636E5] text-white font-bold text-xs py-3.5 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] min-h-[48px] disabled:opacity-40"
                 >
-                  <LogIn className="w-4.5 h-4.5" />
-                  SE CONNECTER
+                  <LogIn className="w-4 h-4" />
+                  Se connecter
                 </button>
               </form>
             ) : (
               /* SMS OTP Mode Form */
-              <form onSubmit={otpSent ? handleOtpLogin : handleRequestOtp} className="space-y-3.5">
+              <form onSubmit={otpSent ? handleOtpLogin : handleRequestOtp} className="space-y-3">
                 <div className="space-y-1">
                   <div className="relative">
                     <input 
@@ -592,14 +530,10 @@ export default function DriverLogin() {
                       value={phone}
                       disabled={otpSent || lockoutTime > 0}
                       onChange={(e) => setPhone(e.target.value)}
-                      className={`w-full border-2 rounded-2xl px-4 py-4 text-xs focus:outline-none focus:ring-1 focus:ring-[#6D4AFF]/20 transition-all font-mono placeholder-slate-500 text-center tracking-wider font-extrabold disabled:opacity-40 min-h-[56px] ${
-                        darkMode 
-                          ? 'bg-slate-950 border-white/10 text-white focus:border-[#6D4AFF] focus:bg-slate-900' 
-                          : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-[#6D4AFF] focus:bg-white'
-                      }`}
+                      className="w-full border border-slate-200 rounded-2xl px-4 py-3.5 text-xs focus:outline-none focus:border-[#6D4AFF] focus:bg-white transition-all font-mono placeholder-slate-400 text-center tracking-wider font-semibold disabled:opacity-40 min-h-[48px] bg-slate-50 text-slate-800"
                       placeholder="Téléphone (ex: 771234567)"
                     />
-                    <Smartphone className="w-4 h-4 text-slate-500 absolute left-4 top-4.5" />
+                    <Smartphone className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
                   </div>
                 </div>
 
@@ -614,14 +548,10 @@ export default function DriverLogin() {
                         value={otpCode}
                         disabled={lockoutTime > 0}
                         onChange={(e) => setOtpCode(e.target.value)}
-                        className={`w-full border-2 rounded-2xl px-4 py-4 text-xs focus:outline-none focus:ring-1 focus:ring-[#6D4AFF]/20 transition-all font-mono tracking-widest text-center placeholder-slate-500 font-extrabold min-h-[56px] ${
-                          darkMode 
-                            ? 'bg-slate-950 border-white/10 text-white focus:border-[#6D4AFF] focus:bg-slate-900' 
-                            : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-[#6D4AFF] focus:bg-white'
-                        }`}
+                        className="w-full border border-slate-200 rounded-2xl px-4 py-3.5 text-xs focus:outline-none focus:border-[#6D4AFF] focus:bg-white transition-all font-mono tracking-widest text-center placeholder-slate-400 font-semibold min-h-[48px] bg-slate-50 text-slate-800"
                         placeholder="Code SMS reçu"
                       />
-                      <KeyRound className="w-4 h-4 text-slate-500 absolute left-4 top-4.5" />
+                      <KeyRound className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
                     </div>
                   </div>
                 )}
@@ -629,10 +559,10 @@ export default function DriverLogin() {
                 <button 
                   type="submit"
                   disabled={lockoutTime > 0}
-                  className="w-full bg-[#6D4AFF] hover:bg-[#5636E5] text-white font-black text-xs py-4 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-[#6D4AFF]/10 active:scale-[0.97] min-h-[56px] disabled:opacity-40"
+                  className="w-full bg-[#6D4AFF] hover:bg-[#5636E5] text-white font-bold text-xs py-3.5 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] min-h-[48px] disabled:opacity-40"
                 >
-                  <KeyRound className="w-4.5 h-4.5" />
-                  {otpSent ? "CONFIRMER LE CODE" : "RECEVOIR LE CODE SMS"}
+                  <KeyRound className="w-4 h-4" />
+                  {otpSent ? "Confirmer le code" : "Recevoir le code SMS"}
                 </button>
 
                 {otpSent && (
@@ -642,9 +572,7 @@ export default function DriverLogin() {
                       setOtpSent(false);
                       setOtpCode('');
                     }}
-                    className={`w-full text-[10px] font-black text-center mt-2 cursor-pointer transition-colors ${
-                      darkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-[#6D4AFF]'
-                    }`}
+                    className="w-full text-[10px] font-bold text-center mt-2 cursor-pointer text-slate-500 hover:text-[#6D4AFF] transition-colors"
                   >
                     Changer de numéro
                   </button>
@@ -660,20 +588,14 @@ export default function DriverLogin() {
                 setOtpCode('');
                 setError('');
               }}
-              className={`text-[10px] font-black text-center underline cursor-pointer transition-colors ${
-                darkMode ? 'text-[#6D4AFF] hover:text-white' : 'text-[#6D4AFF] hover:text-[#5636E5]'
-              }`}
+              className="text-[10px] font-bold text-center underline cursor-pointer text-[#6D4AFF] hover:text-[#5636E5] transition-colors"
             >
               {loginMode === 'pin' ? "S'authentifier plutôt par code SMS (OTP)" : "S'authentifier plutôt par code PIN"}
             </button>
 
             {/* Simulated Live Magic Link Button */}
-            <div className={`p-4 rounded-3xl border text-center space-y-3 transition-colors ${
-              darkMode 
-                ? 'bg-[#121824] border-white/5 text-slate-450' 
-                : 'bg-slate-100 border-slate-200 text-slate-600'
-            }`}>
-              <p className={`text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+            <div className="p-4 rounded-3xl border border-slate-150 bg-white text-slate-600 text-center space-y-3 shadow-sm">
+              <p className="text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 text-slate-700">
                 <Link2 className="w-4 h-4 text-[#6D4AFF]" />
                 Simulateur Magic Link (WhatsApp)
               </p>
@@ -682,22 +604,14 @@ export default function DriverLogin() {
                 <button
                   type="button"
                   onClick={() => simulateMagicLink('d1')}
-                  className={`text-[9.5px] font-black py-2.5 rounded-xl text-center active:scale-95 border cursor-pointer ${
-                    darkMode 
-                      ? 'bg-slate-900 border-white/5 text-emerald-450 hover:bg-slate-850' 
-                      : 'bg-white border-slate-200 text-emerald-600 hover:bg-slate-50'
-                  }`}
+                  className="text-[10px] font-bold py-2 rounded-xl text-center active:scale-95 border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
                 >
                   🔗 Moussa
                 </button>
                 <button
                   type="button"
                   onClick={() => simulateMagicLink('d2')}
-                  className={`text-[9.5px] font-black py-2.5 rounded-xl text-center active:scale-95 border cursor-pointer ${
-                    darkMode 
-                      ? 'bg-slate-900 border-white/5 text-emerald-450 hover:bg-slate-850' 
-                      : 'bg-white border-slate-200 text-emerald-600 hover:bg-slate-50'
-                  }`}
+                  className="text-[10px] font-bold py-2 rounded-xl text-center active:scale-95 border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
                 >
                   🔗 Amadou
                 </button>
@@ -705,12 +619,8 @@ export default function DriverLogin() {
             </div>
 
             {/* Quick demo account connections */}
-            <div className={`p-4 rounded-3xl border space-y-2.5 text-[10.5px] text-left transition-colors ${
-              darkMode 
-                ? 'bg-white/[0.02] border-white/5 text-slate-400' 
-                : 'bg-slate-100/60 border-slate-200 text-slate-600'
-            }`}>
-              <p className={`font-black flex items-center gap-1.5 ${darkMode ? 'text-slate-250' : 'text-slate-700'}`}>
+            <div className="p-4 rounded-3xl border border-slate-150 bg-white text-slate-650 text-left space-y-2.5 shadow-sm text-xs">
+              <p className="font-bold flex items-center gap-1.5 text-slate-800">
                 <UserCheck className="w-4 h-4 text-[#6D4AFF]" />
                 Remplissage Auto (Démo PIN) :
               </p>
@@ -718,21 +628,13 @@ export default function DriverLogin() {
               <div className="grid grid-cols-2 gap-2">
                 <button 
                   onClick={() => selectDemoAccount('771234567', '1234')}
-                  className={`w-full border text-[10px] font-black py-2.5 rounded-xl text-center transition-all active:scale-95 cursor-pointer ${
-                    darkMode 
-                      ? 'bg-slate-900 border-white/5 text-slate-350 hover:bg-slate-850' 
-                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                  }`}
+                  className="w-full border border-slate-200 text-[10px] font-bold py-2 rounded-xl text-center transition-all active:scale-95 cursor-pointer bg-slate-50 text-slate-700 hover:bg-slate-100"
                 >
                   🚗 Moussa (v1)
                 </button>
                 <button 
                   onClick={() => selectDemoAccount('779876543', '5678')}
-                  className={`w-full border text-[10px] font-black py-2.5 rounded-xl text-center transition-all active:scale-95 cursor-pointer ${
-                    darkMode 
-                      ? 'bg-slate-900 border-white/5 text-slate-350 hover:bg-slate-850' 
-                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                  }`}
+                  className="w-full border border-slate-200 text-[10px] font-bold py-2 rounded-xl text-center transition-all active:scale-95 cursor-pointer bg-slate-50 text-slate-700 hover:bg-slate-100"
                 >
                   🚕 Amadou (v2)
                 </button>
@@ -742,9 +644,7 @@ export default function DriverLogin() {
           </div>
 
           {/* Footer inside mobile frame */}
-          <div className={`relative z-20 text-center pt-4 border-t text-[9px] font-black mt-auto flex flex-col gap-0.5 ${
-            darkMode ? 'border-white/5 text-slate-500' : 'border-slate-100 text-slate-400'
-          }`}>
+          <div className="text-center pt-4 border-t border-slate-100 text-[9px] font-semibold mt-auto flex flex-col gap-0.5 text-slate-400">
             <span>PORTAIL MOBILE VERSÉ v2.0</span>
             <span>Sécurité HTTPS • Cryptage de bout en bout</span>
           </div>
@@ -756,11 +656,7 @@ export default function DriverLogin() {
       {/* Switch link back to owner space */}
       <button 
         onClick={() => navigate('/login')} 
-        className={`mt-6 text-xs font-black transition-all cursor-pointer border px-4 py-3 rounded-2xl shadow-md active:scale-95 mb-4 sm:mb-0 ${
-          darkMode 
-            ? 'bg-slate-900 hover:bg-slate-850 border-white/10 text-slate-300' 
-            : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-650 shadow-slate-100'
-        }`}
+        className="mt-6 text-xs font-bold transition-all cursor-pointer border border-slate-200 px-4 py-2.5 rounded-2xl shadow-sm mb-4 sm:mb-0 bg-white hover:bg-slate-50 text-slate-650"
       >
         Espace Propriétaire (Web) 🖥️
       </button>
