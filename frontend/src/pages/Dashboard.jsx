@@ -74,6 +74,7 @@ export default function Dashboard() {
     return getFromDb('maintenances', initialMaintenances);
   });
   const [incidents, setIncidents] = useState(() => getFromDb('incidents', []));
+  const [documents, setDocuments] = useState(() => getFromDb('documents', []));
   const [fleetName, setFleetName] = useState(() => {
     const profile = localStorage.getItem('verse_owner_profile');
     if (profile) {
@@ -431,13 +432,94 @@ export default function Dashboard() {
     { id: 'c_6', driver: 'Ibrahima Ndiaye', vehicle: 'DK-9921-C', date: '2026-06-05', time: '19:30', route: 'Ngor ➔ Point E', amount: 6200, status: 'completed', platform: 'Heetch' }
   ];
 
-  // Documents Mock data
-  const mockDocuments = [
-    { id: 'doc_1', type: 'Assurance RCA Flotte', vehicle: 'DK-3421-A', expiry: '2026-12-31', status: 'valid', file: 'assurance_dk3421a.pdf' },
-    { id: 'doc_2', type: 'Carte Grise Temporaire', vehicle: 'DK-8854-B', expiry: '2028-04-15', status: 'valid', file: 'cartegrise_dk8854b.pdf' },
-    { id: 'doc_3', type: 'Licence Transport VTC', vehicle: 'DK-9921-C', expiry: '2026-08-20', status: 'expiring', file: 'licence_dk9921c.pdf' },
-    { id: 'doc_4', type: 'Visite Technique Annuelle', vehicle: 'DK-3421-A', expiry: '2026-06-25', status: 'expiring', file: 'controtech_dk3421a.pdf' }
-  ];
+  // Calcule le statut d'un document en temps réel à partir de sa date d'expiration
+  // Retourne: { label, color, daysLeft, isExpired, isExpiring, isValid }
+  const getDocStatus = (expiry) => {
+    const daysLeft = Math.ceil((new Date(expiry) - new Date()) / (1000 * 60 * 60 * 24));
+    if (daysLeft <= 0)  return { label: 'Expiré',       color: '#EF4444', daysLeft, isExpired: true,  isExpiring: false, isValid: false };
+    if (daysLeft <= 60) return { label: 'Bientôt expiré', color: '#D97706', daysLeft, isExpired: false, isExpiring: true,  isValid: false };
+    return               { label: 'Valide',           color: '#16A34A', daysLeft, isExpired: false, isExpiring: false, isValid: true  };
+  };
+
+  // Génère et télécharge un PDF HTML pour un document administratif
+  const handleDownloadDocPdf = (doc) => {
+    const { label: statusLabel, color: statusColor } = getDocStatus(doc.expiry);
+    const today = new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>${doc.type} — ${doc.vehicle}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #fff; color: #0F172A; padding: 48px; }
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #6D4AFF; padding-bottom: 20px; margin-bottom: 32px; }
+    .brand { font-size: 22px; font-weight: 900; color: #6D4AFF; }
+    .brand span { color: #0F172A; }
+    .badge { background: ${statusColor}20; color: ${statusColor}; border: 1px solid ${statusColor}40; border-radius: 8px; padding: 4px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    h1 { font-size: 24px; font-weight: 900; margin-bottom: 8px; }
+    .subtitle { font-size: 13px; color: #64748B; margin-bottom: 32px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+    .field { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px; }
+    .field-label { font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .field-value { font-size: 14px; font-weight: 700; color: #0F172A; }
+    .footer { border-top: 1px solid #E2E8F0; padding-top: 20px; font-size: 11px; color: #94A3B8; display: flex; justify-content: space-between; }
+    .watermark { text-align: center; margin: 24px 0; color: #CBD5E1; font-size: 11px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="brand">Verse<span>SaaS</span></div>
+    <div class="badge">${statusLabel}</div>
+  </div>
+  <h1>${doc.type}</h1>
+  <p class="subtitle">Document administratif de la flotte VTC — Généré automatiquement</p>
+  <div class="grid">
+    <div class="field">
+      <div class="field-label">Véhicule concerné</div>
+      <div class="field-value">${doc.vehicle}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Type de document</div>
+      <div class="field-value">${doc.type}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Date d'expiration</div>
+      <div class="field-value">${doc.expiry}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Fichier source</div>
+      <div class="field-value">${doc.file}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Statut</div>
+      <div class="field-value" style="color: ${statusColor}">${statusLabel}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Date de génération</div>
+      <div class="field-value">${today}</div>
+    </div>
+  </div>
+  <div class="watermark">⬛ Ce document a été généré par VerseSaaS — à valider auprès des autorités compétentes</div>
+  <div class="footer">
+    <span>VerseSaaS — Gestion de Flotte VTC</span>
+    <span>Réf. ${doc.id.toUpperCase()} · ${today}</span>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = doc.file.replace('.pdf', '') + '_verse.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   // Filtered lists for search and selectors
   const filteredVehicles = vehicles.filter(v => 
@@ -1144,20 +1226,14 @@ export default function Dashboard() {
                         }
 
                         // Simulated vehicle model image matching
-                        const isToyota = v.brand_model.toLowerCase().includes('toyota');
-                        const isHyundai = v.brand_model.toLowerCase().includes('hyundai');
-                        const vehicleImg = isToyota 
-                          ? 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=80&fit=crop&q=60' // white sedan
-                          : isHyundai
-                            ? 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=80&fit=crop&q=60' // gray sedan
-                            : 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=80&fit=crop&q=60'; // generic gray sedan
-
                         return (
                           <tr key={v.id} className="hover:bg-slate-50/50 transition-colors">
                             {/* Photo, Model & License plate */}
                             <td className="py-4 px-4 whitespace-nowrap">
                               <div className="flex items-center gap-3">
-                                <img src={vehicleImg} alt={v.brand_model} className="w-10 h-7 rounded-lg object-cover border border-slate-100" />
+                                <div className="w-10 h-10 rounded-xl bg-[#6D4AFF]/8 border border-[#6D4AFF]/10 flex items-center justify-center shrink-0">
+                                  <Car className="w-5 h-5 text-[#6D4AFF]" />
+                                </div>
                                 <div>
                                   <div className="font-bold text-slate-850">{v.brand_model}</div>
                                   <div className="flex items-center gap-1.5 mt-1">
@@ -1825,40 +1901,101 @@ export default function Dashboard() {
           {/* ----------------- TAB: DOCUMENTS ----------------- */}
           {activeTab === 'documents' && (
             <div className="space-y-6 animate-fade-in">
-              <div>
-                <h2 className="text-base font-black text-slate-900">Portefeuille de Documents</h2>
-                <p className="text-xs text-slate-500 font-semibold">Gérez les pièces administratives de vos véhicules (assurances, contrôles techniques, licences).</p>
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-base font-black text-slate-900">Portefeuille de Documents</h2>
+                  <p className="text-xs text-slate-500 font-semibold">Pièces administratives de chaque véhicule — assurance, carte grise, licence VTC, visite technique.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {documents.filter(d => !getDocStatus(d.expiry).isValid).length > 0 && (
+                    <span className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-[9.5px] font-extrabold px-3 py-1.5 rounded-xl">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      {documents.filter(d => !getDocStatus(d.expiry).isValid).length} document(s) à renouveler
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* Documents grid */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {mockDocuments.map((doc) => {
-                  const isExpiring = doc.status === 'expiring';
+              {/* Un bloc par véhicule */}
+              <div className="space-y-6">
+                {vehicles.map((v) => {
+                  const vehicleDocs = documents.filter(d => d.vehicle_id === v.id);
+                  const driver = drivers.find(d => d.id === v.driver_id);
+                  const hasAlert = vehicleDocs.some(d => !getDocStatus(d.expiry).isValid);
+
                   return (
-                    <div key={doc.id} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-4 hover:shadow-md transition-all flex flex-col justify-between h-48">
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-start">
-                          <span className="text-[9px] bg-slate-100 text-slate-500 font-extrabold px-2 py-0.5 rounded font-mono">
-                            {doc.vehicle}
-                          </span>
-                          <span className={`inline-block px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase ${
-                            isExpiring ? 'bg-amber-50 text-amber-700 border border-amber-250/30' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                          }`}>
-                            {isExpiring ? 'Expirera bientôt' : 'Valide'}
-                          </span>
+                    <div key={v.id} className={`bg-white border rounded-2xl shadow-sm overflow-hidden ${hasAlert ? 'border-amber-200' : 'border-slate-100'}`}>
+                      {/* En-tête véhicule */}
+                      <div className={`px-5 py-3.5 flex justify-between items-center border-b ${hasAlert ? 'bg-amber-50/50 border-amber-100' : 'bg-slate-50/70 border-slate-100'}`}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-[#6D4AFF]/10 flex items-center justify-center">
+                            <FileText className="w-4 h-4 text-[#6D4AFF]" />
+                          </div>
+                          <div>
+                            <span className="text-xs font-extrabold text-slate-900">{v.brand_model}</span>
+                            <span className="text-[9px] font-mono font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded ml-2">{v.license_plate}</span>
+                          </div>
                         </div>
-                        <h4 className="text-xs font-bold text-slate-800">{doc.type}</h4>
-                        <p className="text-[10px] text-slate-400 font-semibold">Fichier : {doc.file}</p>
+                        <div className="flex items-center gap-2">
+                          {driver && (
+                            <span className="text-[9.5px] text-slate-500 font-semibold">{driver.name}</span>
+                          )}
+                          {hasAlert && (
+                            <span className="flex items-center gap-1 bg-amber-100 text-amber-700 text-[9px] font-extrabold px-2 py-0.5 rounded-lg border border-amber-200">
+                              <AlertTriangle className="w-3 h-3" /> Attention
+                            </span>
+                          )}
+                        </div>
                       </div>
 
-                      <div className="space-y-3">
-                        <div className="flex justify-between text-[9px] font-bold text-slate-500 border-t border-slate-50 pt-3">
-                          <span>Date d'expiration :</span>
-                          <span className="font-mono text-slate-800">{doc.expiry}</span>
-                        </div>
-                        <button className="w-full bg-slate-50 hover:bg-slate-100 text-slate-650 hover:text-slate-900 text-[9.5px] font-bold py-1.5 rounded-lg border border-slate-200/50 transition-all cursor-pointer">
-                          Télécharger (PDF)
-                        </button>
+                      {/* Grille des 4 documents */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-slate-100">
+                        {vehicleDocs.map((doc) => {
+                          const { label: docLabel, isExpired, isExpiring, isValid, daysLeft } = getDocStatus(doc.expiry);
+                          const isUrgent = !isValid;
+
+                          return (
+                            <div key={doc.id} className={`p-4 flex flex-col gap-3 ${isExpiring || isExpired ? 'bg-amber-50/30' : ''}`}>
+                              <div className="space-y-1.5">
+                                <div className="flex items-start justify-between gap-1">
+                                  <span className={`inline-block px-1.5 py-0.5 rounded text-[8.5px] font-extrabold uppercase ${
+                                    isExpired  ? 'bg-red-100 text-red-600 border border-red-200' :
+                                    isExpiring ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                                                 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                                  }`}>
+                                    {isExpired ? '✕ Expiré' : isExpiring ? '⚠ Bientôt' : '✓ Valide'}
+                                  </span>
+                                </div>
+                                <h5 className="text-[10.5px] font-bold text-slate-800 leading-tight">{doc.type}</h5>
+                                <p className="text-[9px] text-slate-400 font-mono">{doc.file}</p>
+                              </div>
+
+                              <div className="mt-auto space-y-2">
+                                <div className={`text-[9px] font-bold flex items-center gap-1 ${isUrgent ? 'text-amber-600' : 'text-slate-500'}`}>
+                                  <span>Expire :</span>
+                                  <span className="font-mono">{doc.expiry}</span>
+                                </div>
+                                {isUrgent && (
+                                  <div className={`text-[8.5px] font-bold ${isExpired ? 'text-red-600' : 'text-amber-600'}`}>
+                                    {isExpired ? `Expiré depuis ${Math.abs(daysLeft)} j` : `J-${daysLeft} jours`}
+                                  </div>
+                                )}
+                                <button
+                                  onClick={() => handleDownloadDocPdf({ ...doc, vehicle: v.license_plate })}
+                                  className="w-full bg-slate-50 hover:bg-[#6D4AFF] hover:text-white text-slate-600 text-[8.5px] font-bold py-1 rounded-lg border border-slate-200 hover:border-[#6D4AFF] transition-all cursor-pointer flex items-center justify-center gap-1"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                  Télécharger
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {vehicleDocs.length === 0 && (
+                          <div className="col-span-4 py-8 text-center text-xs text-slate-400 font-bold italic">
+                            Aucun document enregistré pour ce véhicule.
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
