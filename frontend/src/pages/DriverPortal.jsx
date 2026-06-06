@@ -805,17 +805,9 @@ export default function DriverPortal() {
                 {/* Sleek Vehicle Card */}
                 <div className="bg-white border border-slate-100 rounded-2xl p-3.5 shadow-sm flex items-center justify-between text-left">
                   <div className="flex items-center gap-3.5">
-                    {vehicle.vehicle_image ? (
-                      <img 
-                        src={vehicle.vehicle_image} 
-                        alt={vehicle.brand_model} 
-                        className="w-12 h-12 object-cover rounded-xl border border-slate-100 shrink-0"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 text-slate-400">
-                        <Car className="w-6 h-6" />
-                      </div>
-                    )}
+                    <div className="w-12 h-12 rounded-xl bg-[#6D4AFF]/8 border border-[#6D4AFF]/10 flex items-center justify-center shrink-0">
+                      <Car className="w-6 h-6 text-[#6D4AFF]" />
+                    </div>
                     <div className="space-y-0.5 text-left">
                       <span className="text-[9px] font-bold text-[#6D4AFF] uppercase tracking-wider block">Véhicule</span>
                       <h4 className="text-sm font-bold text-slate-900 leading-tight">
@@ -1302,17 +1294,9 @@ export default function DriverPortal() {
               {/* Specs vehicle card */}
               <div className="bg-white border border-slate-100 rounded-3xl p-4 shadow-xs text-left space-y-3.5">
                 <div className="flex gap-4 items-center">
-                  {vehicle.vehicle_image ? (
-                    <img 
-                      src={vehicle.vehicle_image} 
-                      alt={vehicle.brand_model} 
-                      className="w-16 h-16 object-cover rounded-2xl border border-slate-100"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-150">
-                      <Car className="w-8 h-8" />
-                    </div>
-                  )}
+                  <div className="w-16 h-16 rounded-2xl bg-[#6D4AFF]/8 border border-[#6D4AFF]/10 flex items-center justify-center shrink-0">
+                    <Car className="w-8 h-8 text-[#6D4AFF]" />
+                  </div>
                   <div className="space-y-0.5">
                     <span className="text-[8px] bg-purple-50 text-[#6D4AFF] border border-purple-100 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wide">Toyota</span>
                     <h4 className="text-md font-bold text-slate-900 leading-tight">{vehicle.brand_model || 'Toyota Corolla'}</h4>

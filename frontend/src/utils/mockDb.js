@@ -6,8 +6,7 @@ const initialVehicles = [
     current_mileage: 48900, 
     last_oil_change_mileage: 44100, 
     status: 'active', 
-    driver_id: 'd1',
-    vehicle_image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80' // Silver sedan
+    driver_id: 'd1'
   },
   { 
     id: 'v2', 
@@ -16,8 +15,7 @@ const initialVehicles = [
     current_mileage: 125600, 
     last_oil_change_mileage: 124900, 
     status: 'active', 
-    driver_id: 'd2',
-    vehicle_image: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=600&auto=format&fit=crop&q=80' // Blue sedan
+    driver_id: 'd2'
   },
   { 
     id: 'v3', 
@@ -26,8 +24,7 @@ const initialVehicles = [
     current_mileage: 83200, 
     last_oil_change_mileage: 78500, 
     status: 'maintenance', 
-    driver_id: 'd3',
-    vehicle_image: 'https://images.unsplash.com/photo-1605558158382-95993a8e9725?w=600&auto=format&fit=crop&q=80' // White sedan
+    driver_id: 'd3'
   }
 ];
 

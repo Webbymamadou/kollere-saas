@@ -1218,20 +1218,14 @@ export default function Dashboard() {
                         }
 
                         // Simulated vehicle model image matching
-                        const isToyota = v.brand_model.toLowerCase().includes('toyota');
-                        const isHyundai = v.brand_model.toLowerCase().includes('hyundai');
-                        const vehicleImg = isToyota 
-                          ? 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=80&fit=crop&q=60' // white sedan
-                          : isHyundai
-                            ? 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=80&fit=crop&q=60' // gray sedan
-                            : 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=80&fit=crop&q=60'; // generic gray sedan
-
                         return (
                           <tr key={v.id} className="hover:bg-slate-50/50 transition-colors">
                             {/* Photo, Model & License plate */}
                             <td className="py-4 px-4 whitespace-nowrap">
                               <div className="flex items-center gap-3">
-                                <img src={vehicleImg} alt={v.brand_model} className="w-10 h-7 rounded-lg object-cover border border-slate-100" />
+                                <div className="w-10 h-10 rounded-xl bg-[#6D4AFF]/8 border border-[#6D4AFF]/10 flex items-center justify-center shrink-0">
+                                  <Car className="w-5 h-5 text-[#6D4AFF]" />
+                                </div>
                                 <div>
                                   <div className="font-bold text-slate-850">{v.brand_model}</div>
                                   <div className="flex items-center gap-1.5 mt-1">
