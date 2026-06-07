@@ -18,7 +18,7 @@ fi
 echo "[$(date)] Début de la sauvegarde de la base de données ${DB_DATABASE}..."
 
 # Effectuer le dump PostgreSQL compressé
-PGPASSWORD="${DB_PASSWORD}" pg_dump -h "${DB_HOST}" -p "${DB_PORTj}" -U "${DB_USERNAME}" -d "${DB_DATABASE}" | gzip > "$BACKUP_FILE"
+PGPASSWORD="${DB_PASSWORD}" pg_dump -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USERNAME}" -d "${DB_DATABASE}" | gzip > "$BACKUP_FILE"
 
 if [ $? -eq 0 ]; then
     echo "[$(date)] Sauvegarde locale créée avec succès : ${BACKUP_FILE}"
