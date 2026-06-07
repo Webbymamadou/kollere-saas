@@ -15,6 +15,7 @@ class Payment extends Model
         'status',
         'transaction_reference',
         'receipt_image_url',
+        'odometer',
         'submitted_at',
         'validated_at',
     ];
@@ -24,3 +25,4 @@ class Payment extends Model
         return $this->belongsTo(Vehicle::class);
     }
 }
+
