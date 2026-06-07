@@ -14,6 +14,7 @@ class Vehicle extends Model
         'brand_model',
         'current_mileage',
         'last_oil_change_mileage',
+        'pending_mileage',
         'status',
     ];
 
@@ -36,4 +37,15 @@ class Vehicle extends Model
     {
         return $this->hasMany(Maintenance::class);
     }
+
+    public function incidents()
+    {
+        return $this->hasMany(Incident::class);
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
+    }
 }
+
