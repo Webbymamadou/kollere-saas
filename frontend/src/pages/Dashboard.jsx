@@ -29,11 +29,11 @@ import {
 
 import { getFromDb, saveToDb } from '../utils/mockDb';
 
-// Import upgraded modals
+// Importation des boîtes modales améliorées
 import ReceiptModal from '../components/ReceiptModal';
 import AddVehicleModal from '../components/AddVehicleModal';
 
-// Chart.js imports & registration
+// Importations et enregistrement de Chart.js
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -86,20 +86,20 @@ export default function Dashboard() {
     return 'Dakar Fleet';
   });
   
-  // Custom tabs and sidebar navigation
+  // Onglets personnalisés et navigation de la barre latérale
   const [activeTab, setActiveTab] = useState('dashboard');
   
-  // Modals & Popovers
+  // Boîtes modales et popovers
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   
-  // Search & Filters
+  // Recherche et filtres
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentFilter, setPaymentFilter] = useState('all'); // all, approved, pending, rejected
   const [incidentFilter, setIncidentFilter] = useState('all'); // all, pending, resolved
   
-  // Notification states
+  // États pour la gestion des notifications
   const [notifications, setNotifications] = useState([
     { id: 'init-1', title: 'Système configuré', body: 'Le dashboard premium Kollëré est opérationnel.', time: '18:30', read: false },
     { id: 'init-2', title: 'Relances WhatsApp', body: 'Tâches programmées à 22h00 prêtes.', time: '17:45', read: true }
@@ -109,7 +109,7 @@ export default function Dashboard() {
 
   const navigate = useNavigate();
 
-  // Load data from mock DB on mount
+  // Charger les données de la base simulée lors du montage
   useEffect(() => {
     const role = localStorage.getItem('verse_auth_role');
     if (role !== 'owner') {
@@ -117,14 +117,14 @@ export default function Dashboard() {
     }
   }, [navigate]);
 
-  // Request browser notification permission on mount
+  // Demander l'autorisation des notifications système au montage
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
   }, []);
 
-  // Close notifications panel on outside click
+  // Fermer le panneau de notifications lors d'un clic extérieur
   useEffect(() => {
     function handleClickOutside(event) {
       if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
@@ -136,7 +136,7 @@ export default function Dashboard() {
   }, []);
 
   const triggerNotification = (title, body) => {
-    // Add to internal notification center
+    // Ajouter au centre interne de notifications
     const timeNow = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     const newNotif = {
       id: 'n_' + Date.now(),
@@ -147,7 +147,7 @@ export default function Dashboard() {
     };
     setNotifications(prev => [newNotif, ...prev]);
 
-    // System level HTML5 notification
+    // Notification HTML5 système
     if ("Notification" in window && Notification.permission === "granted") {
       new Notification(title, { 
         body,
@@ -157,7 +157,7 @@ export default function Dashboard() {
     }
   };
 
-  // Listen to cross-tab updates via localStorage to auto-refresh state and trigger notifications
+  // Écouter les mises à jour cross-onglet via localStorage pour rafraîchir l'état et notifier
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === 'verse_payments') {
@@ -220,7 +220,7 @@ export default function Dashboard() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [payments, incidents]);
 
-  // Business Logic handlers
+  // Gestionnaires de logique métier
   const handleApprovePayment = (paymentId) => {
     const updatedPayments = payments.map(p => {
       if (p.id === paymentId) {
@@ -400,7 +400,7 @@ export default function Dashboard() {
     return { label: 'Correct', driven, remaining, percentage, color: 'text-emerald-600 bg-emerald-50 border-emerald-100', barColor: 'bg-emerald-500', urgent: false };
   };
 
-  // Financial metrics
+  // Métriques financières
   const approvedPayments = payments.filter(p => p.status === 'approved');
   const totalEarnings = approvedPayments.reduce((acc, p) => acc + p.amount, 0);
   const totalSpend = maintenances.reduce((acc, m) => acc + m.cost, 0);
@@ -416,13 +416,13 @@ export default function Dashboard() {
     .filter(p => p.status === 'approved' && p.date.startsWith(currentMonthPrefix))
     .reduce((sum, p) => sum + p.amount, 0);
 
-  // Profitability rate: Net Profit / Gross Earnings
+  // Taux de rentabilité : Bénéfice Net / Gains Bruts
   const profitabilityRate = totalEarnings > 0 
     ? Math.round((netProfit / totalEarnings) * 100) 
     : 100;
 
 
-  // Trips Mock data
+  // Données simulées de trajets (courses)
   const mockCourses = [
     { id: 'c_1', driver: 'Moussa Diop', vehicle: 'DK-3421-A', date: '2026-06-06', time: '14:20', route: 'Mermoz ➔ Plateau', amount: 8500, status: 'completed', platform: 'Yango' },
     { id: 'c_2', driver: 'Amadou Sow', vehicle: 'DK-8854-B', date: '2026-06-06', time: '15:10', route: 'Almadies ➔ AIBD', amount: 22000, status: 'completed', platform: 'Uber' },
@@ -521,7 +521,7 @@ export default function Dashboard() {
     URL.revokeObjectURL(url);
   };
 
-  // Filtered lists for search and selectors
+  // Listes filtrées pour la recherche et les sélecteurs
   const filteredVehicles = vehicles.filter(v => 
     v.brand_model.toLowerCase().includes(searchTerm.toLowerCase()) ||
     v.license_plate.toLowerCase().includes(searchTerm.toLowerCase())
@@ -546,7 +546,7 @@ export default function Dashboard() {
     return matchesSearch && matchesFilter;
   });
 
-  // Calculate Driver Scores for Leaderboard
+  // Calculer les scores des chauffeurs pour le classement
   const getLeaderboardDrivers = () => {
     return drivers.map(d => {
       const dPayments = payments.filter(p => p.driver_name === d.name);
@@ -596,8 +596,8 @@ export default function Dashboard() {
   const leaderboard = getLeaderboardDrivers().slice(0, 3);
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
 
-  // --- CHART CONFIGURATIONS ---
-  // 1. Line Chart: Evolution of revenues (Last 6 Months)
+  // --- CONFIGURATIONS DES GRAPHIQUES ---
+  // 1. Graphique linéaire : Évolution des revenus (6 derniers mois)
   const lineChartData = {
     labels: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'],
     datasets: [
@@ -636,7 +636,7 @@ export default function Dashboard() {
     }
   };
 
-  // 2. Bar Chart: Drivers Earnings Comparison
+  // 2. Graphique à barres : Comparaison des gains des chauffeurs
   const barChartData = {
     labels: drivers.map(d => d.name),
     datasets: [
@@ -674,7 +674,7 @@ export default function Dashboard() {
     }
   };
 
-  // 3. Donut Chart: Vehicle Status Distribution
+  // 3. Graphique en beignet : Répartition du statut des véhicules
   const getVehicleDistribution = () => {
     let online = 0;
     let offline = 0;
@@ -736,8 +736,8 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-slate-50 flex text-slate-800 antialiased font-sans select-none">
       
-      {/* --- SIDEBAR BAR --- */}
-      {/* Desktop fixed sidebar */}
+      {/* --- BARRE LATÉRALE --- */}
+      {/* Barre latérale fixe de bureau */}
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-100 fixed top-0 bottom-0 left-0 z-30">
         {/* Brand Header */}
         <div className="h-16 px-6 border-b border-slate-100 flex items-center justify-between">
@@ -752,7 +752,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Navigation Menu */}
+        {/* Menu de navigation */}
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {[
             { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -793,7 +793,7 @@ export default function Dashboard() {
           })}
         </nav>
 
-        {/* Owner Info & Logout */}
+        {/* Infos propriétaire et déconnexion */}
         <div className="p-4 border-t border-slate-100 bg-white">
           <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50">
             <div className="w-8 h-8 rounded-full bg-[#6D4AFF]/10 text-[#6D4AFF] flex items-center justify-center font-extrabold text-xs">
@@ -814,7 +814,7 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* Responsive mobile sidebar Drawer */}
+      {/* Volet latéral mobile responsive */}
       {mobileSidebarOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 md:hidden flex">
           <div className="w-64 bg-white flex flex-col h-full shadow-2xl animate-fade-in">
@@ -882,10 +882,10 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* --- MAIN PAGE CONTENT --- */}
+      {/* --- CONTENU PRINCIPAL DE LA PAGE --- */}
       <div className="flex-1 md:pl-64 flex flex-col min-h-screen bg-[#F8FAFC]">
         
-        {/* Top Header Bar */}
+        {/* Barre d'en-tête supérieure */}
         <header className="h-16 px-6 border-b border-slate-100 bg-white flex items-center justify-between sticky top-0 z-10 shadow-sm shadow-slate-100/10">
           <div className="flex items-center gap-4">
             <button 
@@ -902,7 +902,7 @@ export default function Dashboard() {
 
           <div className="flex items-center gap-4">
             
-            {/* Search Input (Global to page context) */}
+            {/* Zone de recherche (globale au contexte de page) */}
             <div className="relative hidden sm:block w-48 md:w-64">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input 
@@ -914,7 +914,7 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* Notifications Bell Dropdown */}
+            {/* Menu déroulant de la cloche de notifications */}
             <div className="relative" ref={notificationsRef}>
               <button 
                 onClick={() => {
@@ -965,7 +965,7 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* Quick action: Add Vehicle / Driver */}
+            {/* Action rapide : Ajouter un véhicule ou chauffeur */}
             <button
               onClick={() => setShowAddModal(true)}
               className="bg-[#6D4AFF] hover:bg-[#5636E5] text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-md shadow-[#6D4AFF]/10 hover:shadow-lg hover:shadow-[#6D4AFF]/20 active:scale-98"
@@ -974,7 +974,7 @@ export default function Dashboard() {
               <span>Nouveau</span>
             </button>
 
-            {/* Driver portal quick link */}
+            {/* Lien rapide vers le portail chauffeur */}
             <button
               onClick={() => navigate('/driver/portal')}
               className="text-[10px] text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200/40 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer font-bold hidden sm:block"
@@ -985,14 +985,14 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* --- MAIN SCROLLABLE CONTAINER --- */}
+        {/* --- CONTENEUR SCROLLABLE PRINCIPAL --- */}
         <main className="flex-1 p-6 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
 
-          {/* ----------------- TAB: GENERAL DASHBOARD ----------------- */}
+          {/* ----------------- ONGLET : TABLEAU DE BORD ----------------- */}
           {activeTab === 'dashboard' && (
             <div className="space-y-8 animate-fade-in">
               
-              {/* Welcome Banner */}
+              {/* Bannière de bienvenue */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm shadow-slate-100/10">
                 <div className="space-y-1">
                   <h2 className="text-lg font-black text-slate-900">Bienvenue sur votre espace Versé 👋</h2>
@@ -1175,7 +1175,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ----------------- TAB: VÉHICULES ----------------- */}
+          {/* ----------------- ONGLET : VÉHICULES ----------------- */}
           {activeTab === 'vehicles' && (
             <div className="space-y-6 animate-fade-in">
               <div className="flex justify-between items-center">
@@ -1225,10 +1225,10 @@ export default function Dashboard() {
                           statusColor = 'text-red-700 bg-red-50 border-red-150';
                         }
 
-                        // Simulated vehicle model image matching
+                        {/* Correspondance simulée de l'image du modèle de véhicule */}
                         return (
                           <tr key={v.id} className="hover:bg-slate-50/50 transition-colors">
-                            {/* Photo, Model & License plate */}
+                            {/* Photo, Modèle & Plaque d'immatriculation */}
                             <td className="py-4 px-4 whitespace-nowrap">
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-[#6D4AFF]/8 border border-[#6D4AFF]/10 flex items-center justify-center shrink-0">
@@ -1333,7 +1333,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ----------------- TAB: CHAUFFEURS ----------------- */}
+          {/* ----------------- ONGLET : CHAUFFEURS ----------------- */}
           {activeTab === 'drivers' && (
             <div className="space-y-6 animate-fade-in">
               <div className="flex justify-between items-center">
@@ -1514,7 +1514,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ----------------- TAB: PAIEMENTS ----------------- */}
+          {/* ----------------- ONGLET : PAIEMENTS ----------------- */}
           {activeTab === 'payments' && (
             <div className="space-y-6 animate-fade-in">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -1540,7 +1540,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Payments History Table */}
+              {/* Table de l'historique des paiements */}
               <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
@@ -1614,7 +1614,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ----------------- TAB: COURSES ----------------- */}
+          {/* ----------------- ONGLET : COURSES ----------------- */}
           {activeTab === 'courses' && (
             <div className="space-y-6 animate-fade-in">
               <div>
@@ -1672,7 +1672,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ----------------- TAB: REVENUS (COMPTABILITÉ) ----------------- */}
+          {/* ----------------- ONGLET : REVENUS ----------------- */}
           {activeTab === 'revenus' && (
             <div className="space-y-6 animate-fade-in">
               <div>
@@ -1752,7 +1752,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ----------------- TAB: STATISTIQUES (ANALYTICS) ----------------- */}
+          {/* ----------------- ONGLET : STATISTIQUES ----------------- */}
           {activeTab === 'stats' && (
             <div className="space-y-6 animate-fade-in">
               <div>
@@ -1788,7 +1788,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ----------------- TAB: ALERTES & INCIDENTS ----------------- */}
+          {/* ----------------- ONGLET : ALERTES ----------------- */}
           {activeTab === 'alertes' && (
             <div className="space-y-6 animate-fade-in">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -1898,7 +1898,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ----------------- TAB: DOCUMENTS ----------------- */}
+          {/* ----------------- ONGLET : DOCUMENTS ----------------- */}
           {activeTab === 'documents' && (
             <div className="space-y-6 animate-fade-in">
               <div className="flex justify-between items-center">
@@ -2004,7 +2004,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ----------------- TAB: PARAMÈTRES ----------------- */}
+          {/* ----------------- ONGLET : PARAMÈTRES ----------------- */}
           {activeTab === 'settings' && (
             <div className="space-y-6 animate-fade-in max-w-xl">
               <div>
@@ -2075,7 +2075,7 @@ export default function Dashboard() {
 
       </div>
 
-      {/* --- POPUPS & MODALS --- */}
+      {/* --- FENÊTRES MODALES & POPUPS --- */}
       <ReceiptModal 
         selectedReceipt={selectedReceipt} 
         setSelectedReceipt={() => setSelectedReceipt(null)} 

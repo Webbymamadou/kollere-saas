@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { getFromDb, saveToDb } from '../utils/mockDb';
 
-// Pure helper functions declared outside the render cycle to comply with React hook purity rules
+// Fonctions utilitaires pures déclarées en dehors du cycle de rendu pour respecter les règles de pureté des hooks React
 const generateUniqueId = (prefix) => {
   return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 };
@@ -75,12 +75,12 @@ export default function DriverPortal() {
   const [incidents, setIncidents] = useState(() => getFromDb('incidents', []));
   const [audits, setAudits] = useState(() => getFromDb('audits', []));
   
-  // Custom styling settings (defaults to light mode)
+  // Configuration des styles personnalisés (par défaut en mode clair)
   const [darkMode, setDarkMode] = useState(false);
   const [showSosDialog, setShowSosDialog] = useState(false);
   const navigate = useNavigate();
 
-  // Form states (Declaration)
+  // États du formulaire (Déclaration)
   const [mileage, setMileage] = useState('');
   const [amount, setAmount] = useState('15000');
   const [paymentMethod, setPaymentMethod] = useState('wave'); // 'wave', 'orange_money', 'cash'
@@ -89,21 +89,21 @@ export default function DriverPortal() {
   const [isReceiptSelected, setIsReceiptSelected] = useState(false);
   const [error, setError] = useState('');
   
-  // Income update state
+  // État de mise à jour des revenus
   const [isEditingIncome, setIsEditingIncome] = useState(false);
   const [customIncomeInput, setCustomIncomeInput] = useState('');
   
-  // Confirmation step before final submission
+  // Étape de confirmation avant la soumission finale
   const [showConfirmRecap, setShowConfirmRecap] = useState(false);
   const [successOverlay, setSuccessOverlay] = useState(false);
 
-  // Simulated Voice Recorder states
+  // États du magnétophone vocal simulé
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [recordedAudio, setRecordedAudio] = useState(null); // mock audio blob
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
-  // Dynamic GPS simulation states
+  // États de la simulation GPS dynamique
   const [gpsActive, setGpsActive] = useState(true);
   const [gpsMode, setGpsMode] = useState('performance'); // 'performance' or 'eco'
   const [distanceTraveled, setDistanceTraveled] = useState(124.5);
@@ -111,10 +111,10 @@ export default function DriverPortal() {
   const [gpsCoordinates, setGpsCoordinates] = useState({ lat: 14.6928, lng: -17.4467 });
   const [lastGpsTime, setLastGpsTime] = useState('À l\'instant');
 
-  // In-App real-time toast notifications
+  // Notifications toast en temps réel intégrées à l'application
   const [toastNotification, setToastNotification] = useState(null);
   
-  // Notification Drawer state
+  // État du volet de notifications
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(2);
   const [mockNotifications, setMockNotifications] = useState([
@@ -122,12 +122,12 @@ export default function DriverPortal() {
     { id: 2, title: '💰 Versement validé', message: 'Votre dépôt de 15 050 FCFA a été approuvé.', time: 'Hier', type: 'success', read: false }
   ]);
 
-  // Dev Tools panel state
+  // État du panneau des outils de développement (Dev Tools)
   const [showDevPanel, setShowDevPanel] = useState(false);
 
 
 
-  // Notification helper
+  // Fonction utilitaire pour ajouter une notification
   const addNewNotification = (title, message, type = 'info') => {
     const newNotif = {
       id: generateUniqueId('notif'),
@@ -141,7 +141,7 @@ export default function DriverPortal() {
     setUnreadCount(prev => prev + 1);
   };
 
-  // Pre-fill mileage on tab focus
+  // Pré-remplir le kilométrage lorsque l'onglet est actif
   useEffect(() => {
     if (vehicle) {
       const timer = setTimeout(() => {
@@ -151,13 +151,13 @@ export default function DriverPortal() {
     }
   }, [vehicle, activeTab]);
 
-  // Toast helper
+  // Fonction utilitaire pour afficher un toast
   const triggerToast = (title, message, iconType = 'info') => {
     setToastNotification({ title, message, type: iconType });
     setTimeout(() => setToastNotification(null), 5000);
   };
 
-  // Redirect to login if auth is missing
+  // Rediriger vers la page de connexion si l'authentification est absente
   useEffect(() => {
     const driverId = localStorage.getItem('verse_auth_driver_id');
     const role = localStorage.getItem('verse_auth_role');
@@ -166,7 +166,7 @@ export default function DriverPortal() {
     }
   }, [navigate]);
 
-  // Audio recording timer simulation
+  // Simulation du minuteur d'enregistrement audio
   useEffect(() => {
     if (!isRecording) return;
     const interval = setInterval(() => {
@@ -175,7 +175,7 @@ export default function DriverPortal() {
     return () => clearInterval(interval);
   }, [isRecording]);
 
-  // Dynamic GPS Tracker Simulator
+  // Simulateur de traceur GPS dynamique
   useEffect(() => {
     if (!gpsActive) return;
 
@@ -220,7 +220,7 @@ export default function DriverPortal() {
     return () => clearInterval(interval);
   }, [gpsActive, gpsMode, vehicle]);
 
-  // Listen for storage updates (approvals, notifications)
+  // Écouter les mises à jour du stockage local (approbations, notifications)
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === 'verse_payments' && driver) {
@@ -270,7 +270,7 @@ export default function DriverPortal() {
     navigate('/driver/login');
   };
 
-  // Simulated mobile receipt scan
+  // Simulation du scan de reçu mobile
   const handleSimulateUpload = () => {
     setIsReceiptSelected(true);
     const mockRef = generateMockReference(paymentMethod);
@@ -279,7 +279,7 @@ export default function DriverPortal() {
     triggerToast("📸 Reçu enregistré", "Prévisualisation prête dans le récapitulatif.", 'success');
   };
 
-  // Handle odometer check and recap verification
+  // Gérer la vérification de l'odomètre et de la boîte de récapitulatif
   const handleOpenRecap = (e) => {
     e.preventDefault();
     setError('');
@@ -302,7 +302,7 @@ export default function DriverPortal() {
     setShowConfirmRecap(true);
   };
 
-  // Submit payment declaration
+  // Soumettre la déclaration de versement
   const handleConfirmSubmit = () => {
     const mileageNum = parseInt(mileage);
     const currentPayments = getFromDb('payments', []);
@@ -366,7 +366,7 @@ export default function DriverPortal() {
     }, 2200);
   };
 
-  // Submit quick template messages
+  // Soumettre des messages rapides prédéfinis
   const triggerQuickMessage = (messageText) => {
     const currentIncidents = getFromDb('incidents', []);
     const newReport = {
@@ -397,7 +397,7 @@ export default function DriverPortal() {
     triggerToast("💬 Message Envoyé !", `Notification transmise : "${messageText}".`, 'success');
   };
 
-  // SOS Critical Incident Trigger
+  // Déclenchement d'un incident critique SOS
   const handleTriggerSOS = (category) => {
     const currentIncidents = getFromDb('incidents', []);
     const categoryLabels = {
@@ -442,7 +442,7 @@ export default function DriverPortal() {
     }, 800);
   };
 
-  // Simulated Voice Recorder controls
+  // Contrôles du magnétophone vocal simulé
   const startRecording = () => {
     setRecordingSeconds(0);
     setIsRecording(true);
@@ -475,7 +475,7 @@ export default function DriverPortal() {
     }
   };
 
-  // Save Custom Daily Earnings
+  // Sauvegarder les gains journaliers personnalisés
   const handleSaveIncome = (e) => {
     e.preventDefault();
     if (!customIncomeInput || isNaN(customIncomeInput)) {
@@ -499,7 +499,7 @@ export default function DriverPortal() {
     triggerToast("Revenu Enregistré !", `Revenu journalier mis à jour à ${parseFloat(customIncomeInput).toLocaleString()} FCFA.`, 'success');
   };
 
-  // DEVELOPER TOOLS ACTION SIMULATORS
+  // SIMULATEURS D'ACTIONS DES OUTILS DE DÉVELOPPEMENT
   const devApproveLatestPayment = () => {
     const currentPayments = getFromDb('payments', []);
     const myPayment = currentPayments.find(p => p.driver_name === driver.name && p.status === 'pending');
@@ -556,14 +556,14 @@ export default function DriverPortal() {
 
   if (!driver || !vehicle) return null;
 
-  // Calculations for current daily status
+  // Calculs du statut quotidien actuel
   const todayStr = new Date().toISOString().split('T')[0];
   const myPaymentsToday = payments.filter(p => p.driver_name === driver.name && p.date === todayStr);
   const isPaidToday = myPaymentsToday.some(p => p.status === 'approved');
   const isPendingToday = myPaymentsToday.some(p => p.status === 'pending');
   const amountPaidToday = myPaymentsToday.filter(p => p.status === 'approved').reduce((sum, p) => sum + p.amount, 0);
 
-  // Notification toggler
+  // Bascule du volet de notifications
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
     if (!showNotifications) {
@@ -577,14 +577,14 @@ export default function DriverPortal() {
       darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'
     }`}>
       
-      {/* Background blobs (subtle glow) */}
+      {/* Halos d'arrière-plan (lueur subtile) */}
       {darkMode ? (
         <div className="absolute top-1/4 left-1/3 w-[450px] h-[450px] bg-[#6D4AFF]/10 rounded-full blur-[140px] pointer-events-none"></div>
       ) : (
         <div className="absolute top-1/4 left-1/3 w-[450px] h-[450px] bg-[#6D4AFF]/5 rounded-full blur-[110px] pointer-events-none"></div>
       )}
 
-      {/* --- IN-APP TOAST SYSTEM --- */}
+      {/* --- SYSTÈME DE TOAST INTÉGRÉ --- */}
       {toastNotification && (
         <div className={`fixed top-4 left-1/2 -translate-x-1/2 w-[92%] max-w-xs border rounded-3xl p-4 shadow-xl z-50 flex gap-3.5 text-slate-800 bg-white border-slate-200 animate-sms-toast`}>
           <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-[#6D4AFF]/10 text-[#6D4AFF]">
@@ -597,14 +597,14 @@ export default function DriverPortal() {
         </div>
       )}
 
-      {/* Smartphone frame container */}
+      {/* Conteneur du cadre de smartphone */}
       <div className={`w-full h-full min-h-screen sm:min-h-[740px] sm:max-w-[390px] overflow-hidden sm:shadow-2xl relative flex flex-col sm:border-[8px] transition-all duration-300 ${
         darkMode 
           ? 'bg-[#090D16] sm:border-slate-800 sm:rounded-[50px] shadow-black/90 text-white' 
           : 'bg-[#F8FAFC] sm:border-slate-250 sm:rounded-[50px] shadow-slate-300/40 text-[#0F172A]'
       }`}>
         
-        {/* Smartphone Top Notch */}
+        {/* Encoche supérieure du smartphone */}
         <div className={`hidden sm:flex h-5.5 w-32 mx-auto rounded-b-2xl absolute top-0 left-1/2 -translate-x-1/2 z-40 items-center justify-center ${
           darkMode ? 'bg-slate-850' : 'bg-slate-200'
         }`}>
@@ -612,7 +612,7 @@ export default function DriverPortal() {
           <span className="w-8 h-1 rounded bg-black/20 block"></span>
         </div>
 
-        {/* Status Bar */}
+        {/* Barre de statut supérieure */}
         <div className={`pt-3 sm:pt-6 px-5 pb-2.5 flex justify-between items-center text-[10px] font-mono z-30 font-semibold ${
           darkMode ? 'bg-slate-900/40 text-slate-450' : 'bg-slate-100/40 text-slate-500'
         }`}>
@@ -626,7 +626,7 @@ export default function DriverPortal() {
           </div>
         </div>
 
-        {/* Custom App Header */}
+        {/* En-tête d'application personnalisé */}
         <div className={`border-b px-5 py-3.5 flex justify-between items-center z-30 transition-colors ${
           darkMode ? 'bg-slate-900/60 border-white/5 backdrop-blur-md' : 'bg-white border-slate-100 shadow-sm'
         }`}>
@@ -638,7 +638,7 @@ export default function DriverPortal() {
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Notification Bell */}
+            {/* Cloche de notifications */}
             <button
               onClick={toggleNotifications}
               className={`w-9 h-9 rounded-2xl border flex items-center justify-center transition-all cursor-pointer relative ${
@@ -655,7 +655,7 @@ export default function DriverPortal() {
           </div>
         </div>
 
-        {/* Notification Drawer Block */}
+        {/* Bloc du volet de notifications */}
         {showNotifications && (
           <div className={`absolute top-[11%] inset-x-0 mx-4 border rounded-3xl p-4 shadow-xl z-40 animate-fade-in ${
             darkMode ? 'bg-slate-900 border-white/10 text-white' : 'bg-white border-slate-150 text-slate-800'
@@ -686,12 +686,12 @@ export default function DriverPortal() {
           </div>
         )}
 
-        {/* Smartphone Screen Body */}
+        {/* Écran interne du smartphone */}
         <div className={`flex-1 overflow-y-auto relative p-4 pb-24 flex flex-col transition-colors ${
           darkMode ? 'bg-[#060A12]' : 'bg-[#F8FAFC]'
         }`}>
           
-          {/* --- DECLARATION FINAL ANIMATED SUCCESS OVERLAY --- */}
+          {/* --- ÉCRAN DE SUCCÈS ANIMÉ DE LA DÉCLARATION --- */}
           {successOverlay && (
             <div className="absolute inset-0 bg-white/95 dark:bg-slate-950/95 z-50 flex flex-col items-center justify-center text-center p-6 animate-fadeIn">
               <div className="w-16 h-16 bg-emerald-50 border border-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mb-5 animate-scaleUp">
@@ -707,7 +707,7 @@ export default function DriverPortal() {
             </div>
           )}
 
-          {/* --- CONFIRMATION DECLARATION DRAWER MODAL --- */}
+          {/* --- TIROIR DE CONFIRMATION DE LA DÉCLARATION --- */}
           {showConfirmRecap && (
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs z-40 flex items-center justify-center p-4">
               <div className={`border rounded-3xl w-full max-w-xs overflow-hidden shadow-2xl p-5 space-y-4 animate-fade-in text-left ${
@@ -769,13 +769,13 @@ export default function DriverPortal() {
             </div>
           )}
 
-          {/* ----------------- TAB: HOME (ACCUEIL) ----------------- */}
+          {/* ----------------- ONGLET : ACCUEIL ----------------- */}
           {activeTab === 'home' && (
             <div className="space-y-4 flex-1 flex flex-col justify-between">
               
               <div className="space-y-4">
                 
-                {/* Visual Status Banner Card */}
+                {/* Carte de bannière de statut visuel */}
                 {isPaidToday ? (
                   <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center space-y-1 flex flex-col items-center shadow-xs text-left">
                     <span className="text-xl">🟢</span>
@@ -802,7 +802,7 @@ export default function DriverPortal() {
                   </div>
                 )}
 
-                {/* Sleek Vehicle Card */}
+                {/* Carte élégante du véhicule */}
                 <div className="bg-white border border-slate-100 rounded-2xl p-3.5 shadow-sm flex items-center justify-between text-left">
                   <div className="flex items-center gap-3.5">
                     <div className="w-12 h-12 rounded-xl bg-[#6D4AFF]/8 border border-[#6D4AFF]/10 flex items-center justify-center shrink-0">
@@ -825,7 +825,7 @@ export default function DriverPortal() {
                   </div>
                 </div>
 
-                {/* Informations du jour (4 clean simple cards) */}
+                {/* Informations du jour (4 cartes simples) */}
                 <div className="grid grid-cols-2 gap-3 text-left">
                   <div className="bg-white border border-slate-100 p-3.5 rounded-2xl shadow-xs space-y-0.5">
                     <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider block">À verser aujourd'hui</span>
@@ -933,7 +933,7 @@ export default function DriverPortal() {
                   </div>
                 </div>
 
-                {/* Bouton SOS (Single row discrète, pas d'effet dramatique) */}
+                {/* Bouton SOS (Ligne unique discrète, pas d'effet dramatique) */}
                 <div className="bg-red-50 border border-red-100 rounded-2xl p-3.5 flex items-center justify-between text-left shadow-2xs mt-1">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="w-4.5 h-4.5 text-[#EF4444]" />
@@ -953,7 +953,7 @@ export default function DriverPortal() {
 
               </div>
 
-              {/* Simple vehicle signature */}
+              {/* Signature simple du véhicule */}
               <div className="text-center pt-4 border-t border-slate-100 flex justify-between items-center text-[9px] text-slate-400 font-semibold mt-6">
                 <span>Chauffeur : {driver ? driver.name : ''}</span>
                 <span>Toyota Corolla • DK-8854-B</span>
@@ -962,7 +962,7 @@ export default function DriverPortal() {
             </div>
           )}
 
-          {/* ----------------- TAB: VERSEMENTS (FORMULAIRE & LOGS) ----------------- */}
+          {/* ----------------- ONGLET : VERSEMENTS ----------------- */}
           {activeTab === 'declare' && (
             <div className="space-y-4 animate-fadeIn">
               
@@ -976,7 +976,7 @@ export default function DriverPortal() {
 
               <form onSubmit={handleOpenRecap} className="space-y-4">
                 
-                {/* 1. Payment Operator selector (Wave, OM, Cash) */}
+                {/* 1. Sélecteur de l'opérateur de paiement */}
                 <div className="space-y-1.5 text-left">
                   <label className="text-[9.5px] uppercase font-bold text-slate-400 tracking-wider block text-center">1. Moyen de versement</label>
                   <div className="grid grid-cols-3 gap-2">
@@ -1012,7 +1012,7 @@ export default function DriverPortal() {
                   </div>
                 </div>
 
-                {/* 2. Receipt capture / upload */}
+                {/* 2. Capture / Téléchargement du reçu */}
                 {paymentMethod !== 'cash' && (
                   <div className="space-y-1.5 text-left">
                     <label className="text-[9.5px] uppercase font-bold text-slate-400 tracking-wider block text-center">2. Reçu de paiement (Capture)</label>
@@ -1046,7 +1046,7 @@ export default function DriverPortal() {
                   </div>
                 )}
 
-                {/* 3. Mileage Input */}
+                {/* 3. Saisie du kilométrage actuel */}
                 <div className="space-y-1.5 text-left">
                   <label className="text-[9.5px] uppercase font-bold text-slate-400 tracking-wider block text-center">3. Kilométrage actuel</label>
                   <div className="relative">
@@ -1064,7 +1064,7 @@ export default function DriverPortal() {
                   </span>
                 </div>
 
-                {/* 4. Amount Selection */}
+                {/* 4. Sélection du montant */}
                 <div className="space-y-1.5 text-left">
                   <label className="text-[9.5px] uppercase font-bold text-slate-400 tracking-wider block text-center">4. Montant à déclarer</label>
                   <div className="relative">
@@ -1106,7 +1106,7 @@ export default function DriverPortal() {
 
               </form>
 
-              {/* Payments history list */}
+              {/* Historique des déclarations de versement */}
               <div className="space-y-2.5 pt-5 border-t border-slate-150 text-left">
                 <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Déclarations de versement</span>
                 <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
@@ -1134,7 +1134,7 @@ export default function DriverPortal() {
             </div>
           )}
 
-          {/* ----------------- TAB: MESSAGES (CHAT & VOCAL) ----------------- */}
+          {/* ----------------- ONGLET : MESSAGES ----------------- */}
           {activeTab === 'chat' && (
             <div className="space-y-4 animate-fadeIn">
               
@@ -1144,13 +1144,13 @@ export default function DriverPortal() {
                 <p className="text-[9.5px] text-slate-550">Vos vocaux et alertes rapides sont visibles directement sur son tableau de bord.</p>
               </div>
 
-              {/* Simulated Voice Message Recorder (WhatsApp Style) */}
+              {/* Magnétophone vocal simulé (Style WhatsApp) */}
               <div className="border border-slate-150 rounded-3xl p-4.5 text-center space-y-3 bg-white shadow-xs">
                 <h5 className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Message Vocal</h5>
 
                 {isRecording ? (
                   <div className="space-y-3">
-                    {/* Audio wave animation */}
+                    {/* Animation de l'onde audio */}
                     <div className="flex items-center justify-center gap-1.5 h-8">
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((bar) => {
                         const height = 6 + ((bar * 5) % 18);
@@ -1234,7 +1234,7 @@ export default function DriverPortal() {
                 )}
               </div>
 
-              {/* Quick Preset Messages in 1 Click */}
+              {/* Messages prédéfinis rapides (Envoi en 1-Clic) */}
               <div className="space-y-2 text-left">
                 <span className="text-[10px] text-slate-450 uppercase font-bold tracking-wider block">Messages rapides (Envoi 1-Clic)</span>
                 
@@ -1260,7 +1260,7 @@ export default function DriverPortal() {
                 </div>
               </div>
 
-              {/* Incidents logs */}
+              {/* Journal des incidents signalés */}
               <div className="space-y-2.5 pt-4 border-t border-slate-150 text-left">
                 <span className="text-[10px] text-slate-455 uppercase font-bold tracking-wider block">Incidents & SOS signalés</span>
                 <div className="space-y-2 max-h-[140px] overflow-y-auto pr-1">
@@ -1282,7 +1282,7 @@ export default function DriverPortal() {
             </div>
           )}
 
-          {/* ----------------- TAB: VÉHICULE (DETAILS & GPS) ----------------- */}
+          {/* ----------------- ONGLET : VÉHICULE ----------------- */}
           {activeTab === 'vehicle' && (
             <div className="space-y-4 animate-fadeIn text-left">
               
@@ -1291,7 +1291,7 @@ export default function DriverPortal() {
                 <p className="text-[9.5px] text-slate-550">Suivi et maintenance de votre outil de travail.</p>
               </div>
 
-              {/* Specs vehicle card */}
+              {/* Fiche technique du véhicule */}
               <div className="bg-white border border-slate-100 rounded-3xl p-4 shadow-xs text-left space-y-3.5">
                 <div className="flex gap-4 items-center">
                   <div className="w-16 h-16 rounded-2xl bg-[#6D4AFF]/8 border border-[#6D4AFF]/10 flex items-center justify-center shrink-0">
@@ -1324,7 +1324,7 @@ export default function DriverPortal() {
                 </div>
               </div>
 
-              {/* Simulated GPS Tracker Widget */}
+              {/* Widget de suivi GPS simulé */}
               <div className="p-4.5 rounded-3xl border border-slate-100 bg-white space-y-3.5 shadow-xs text-left">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
@@ -1376,7 +1376,7 @@ export default function DriverPortal() {
                 </div>
               </div>
 
-              {/* Audit trail security logs */}
+              {/* Journal d'audit et de sécurité */}
               <div className="space-y-2.5 pt-4 border-t border-slate-150 text-left">
                 <span className="text-[10px] text-slate-450 uppercase font-bold tracking-wider block">Journal d'accès & Sécurité</span>
                 <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1">
@@ -1395,7 +1395,7 @@ export default function DriverPortal() {
             </div>
           )}
 
-          {/* ----------------- TAB: PROFIL (PARAMS & LOGOUT) ----------------- */}
+          {/* ----------------- ONGLET : PROFIL ----------------- */}
           {activeTab === 'profile' && (
             <div className="space-y-4 animate-fadeIn text-left">
               
@@ -1404,7 +1404,7 @@ export default function DriverPortal() {
                 <p className="text-[9.5px] text-slate-500">Réglages généraux et outils de démonstration.</p>
               </div>
 
-              {/* Driver info card */}
+              {/* Carte d'informations du chauffeur */}
               <div className="bg-white border border-slate-100 rounded-3xl p-4 shadow-xs text-left flex items-center gap-3.5">
                 <div className="w-12 h-12 rounded-full bg-purple-50 border border-purple-100 text-[#6D4AFF] font-bold text-md flex items-center justify-center shrink-0">
                   {driver ? driver.name.split(' ').map(n => n[0]).join('') : 'AS'}
@@ -1417,7 +1417,7 @@ export default function DriverPortal() {
                 </div>
               </div>
 
-              {/* Settings links */}
+              {/* Liens de réglages */}
               <div className="bg-white border border-slate-100 rounded-3xl p-2.5 shadow-xs text-left text-xs divide-y divide-slate-100">
 
                 <div className="p-3.5 flex justify-between items-center">
@@ -1446,7 +1446,7 @@ export default function DriverPortal() {
                 </div>
               </div>
 
-              {/* Daily Income customizable edit modal */}
+              {/* Fenêtre d'édition du revenu journalier */}
               {isEditingIncome && (
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
                   <form 
@@ -1486,7 +1486,7 @@ export default function DriverPortal() {
                 </div>
               )}
 
-              {/* Collapse Developer Tools panel */}
+              {/* Panneau repliable des outils de développement */}
               <div className="bg-white border border-slate-100 rounded-3xl p-2.5 shadow-xs text-left">
                 <button
                   type="button"
@@ -1543,7 +1543,7 @@ export default function DriverPortal() {
                 )}
               </div>
 
-              {/* Logout button */}
+              {/* Bouton de déconnexion */}
               <button 
                 onClick={handleLogout}
                 className="w-full border border-red-200 bg-red-50/15 text-[#EF4444] font-bold text-xs py-3.5 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-[0.98] mt-4"
@@ -1556,7 +1556,7 @@ export default function DriverPortal() {
 
         </div>
 
-        {/* --- BOTTOM TAB BAR NAVIGATION --- */}
+        {/* --- BARRE DE NAVIGATION INFÉRIEURE --- */}
         <div className="absolute bottom-[30px] inset-x-0 border-t py-2.5 px-4 flex justify-between items-center z-30 backdrop-blur-md transition-colors bg-white/95 border-slate-150 shadow-md">
           
           {[
@@ -1587,14 +1587,14 @@ export default function DriverPortal() {
 
         </div>
 
-        {/* Smartphone Home Indicator Bar */}
+        {/* Barre d'indicateur d'accueil du smartphone */}
         <div className="py-1.5 flex justify-center items-center z-30 mt-auto transition-colors bg-slate-100">
           <span className="w-28 h-1 rounded-full block bg-slate-300"></span>
         </div>
 
       </div>
 
-      {/* Switch links */}
+      {/* Bouton de basculement */}
       <div className="flex gap-4">
         <button 
           onClick={() => navigate('/dashboard')} 
@@ -1604,7 +1604,7 @@ export default function DriverPortal() {
         </button>
       </div>
 
-      {/* SOS dialog overlay modal */}
+      {/* Fenêtre modale des options SOS */}
       {showSosDialog && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-slate-150 rounded-3xl w-full max-w-xs overflow-hidden shadow-2xl p-5 space-y-4 animate-fade-in text-left">

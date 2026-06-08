@@ -70,7 +70,7 @@ export const getFromDb = (key, fallback) => {
   const data = localStorage.getItem(`verse_${key}`);
   if (data) return JSON.parse(data);
   
-  // Use correct initial values as robust fallbacks to prevent empty arrays from poisoning the database
+  // Utiliser les valeurs initiales correctes comme solutions de repli robustes pour éviter que des tableaux vides ne corrompent la base de données
   const fallbacks = {
     vehicles: initialVehicles,
     drivers: initialDrivers,
@@ -98,5 +98,5 @@ export const initDb = () => {
   getFromDb('documents', initialDocuments);
 };
 
-// Eagerly initialize the database on module import to ensure it is populated
+// Initialiser la base de données immédiatement lors de l'importation du module pour s'assurer qu'elle est remplie
 initDb();

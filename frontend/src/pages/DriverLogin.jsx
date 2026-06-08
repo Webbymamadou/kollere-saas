@@ -22,22 +22,22 @@ export default function DriverLogin() {
   const [pin, setPin] = useState('');
   const [showPin, setShowPin] = useState(false);
   
-  // OTP flow states
-  const [loginMode, setLoginMode] = useState('pin'); // 'pin' or 'otp'
+  // États pour le flux OTP
+  const [loginMode, setLoginMode] = useState('pin'); // 'pin' ou 'otp'
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [generatedOtp, setGeneratedOtp] = useState('');
   const [smsNotification, setSmsNotification] = useState(null); // { body }
 
-  // Security brute-force lock states
+  // États de verrouillage de sécurité (anti-brute-force)
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockoutTime, setLockoutTime] = useState(0); // in seconds
   
-  // Magic link check state
+  // État de validation du lien magique
   const [validatingToken, setValidatingToken] = useState(false);
   const [magicLinkError, setMagicLinkError] = useState('');
 
-  // Styling & Error handling states
+  // États pour le style et les erreurs
   const [darkMode, setDarkMode] = useState(true);
   const [error, setError] = useState('');
   const [shake, setShake] = useState(false);
@@ -45,7 +45,7 @@ export default function DriverLogin() {
   
   const navigate = useNavigate();
 
-  // Lockout countdown timer
+  // Minuteur de décompte pour le verrouillage temporaire
   useEffect(() => {
     if (lockoutTime <= 0) return;
     const interval = setInterval(() => {
@@ -61,12 +61,12 @@ export default function DriverLogin() {
     return () => clearInterval(interval);
   }, [lockoutTime]);
 
-  // Magic Link token automatic login on page load
+  // Connexion automatique via jeton de lien magique au chargement
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     if (token) {
-      // Use setTimeout to defer setState out of render flow
+      // Utiliser un setTimeout pour différer le setState hors du flux de rendu
       const timer = setTimeout(() => {
         setValidatingToken(true);
         setTimeout(() => {
@@ -76,7 +76,7 @@ export default function DriverLogin() {
             d.id === token.trim()
           );
           if (driver) {
-            // Log security audit
+            // Enregistrer l'audit de sécurité
             const audits = getFromDb('audits', []);
             const newAudit = {
               id: 'au_' + Date.now(),
@@ -96,13 +96,13 @@ export default function DriverLogin() {
             setMagicLinkError("Lien magique invalide ou expiré.");
             setTimeout(() => setMagicLinkError(''), 5000);
           }
-        }, 1500); // Simulated delay for premium security verification look
+        }, 1500); // Délai simulé pour l'aspect de vérification de sécurité premium
       }, 0);
       return () => clearTimeout(timer);
     }
   }, [navigate]);
 
-  // Helper trigger errors with shake animation
+  // Fonction utilitaire pour déclencher une erreur avec animation de secousse
   const triggerError = (msg) => {
     setShake(true);
     setError(msg);
@@ -110,7 +110,7 @@ export default function DriverLogin() {
     setTimeout(() => setError(''), 4000);
   };
 
-  // Handle standard PIN Login
+  // Gérer la connexion classique par code PIN
   const handlePinLogin = (e) => {
     e.preventDefault();
     setError('');
@@ -158,7 +158,7 @@ export default function DriverLogin() {
     }
   };
 
-  // Propose/Generate simulated SMS OTP
+  // Proposer/Générer le code OTP SMS simulé
   const handleRequestOtp = (e) => {
     e.preventDefault();
     setError('');
@@ -181,17 +181,17 @@ export default function DriverLogin() {
     setGeneratedOtp(code);
     setOtpSent(true);
 
-    // Simulate SMS delivery toast
+    // Simuler l'affichage de notification de réception du SMS
     setTimeout(() => {
       setSmsNotification({
         body: `[SMS Versé] Votre code de connexion sécurisé est : ${code}`
       });
-      // Auto dismiss SMS notification after 8 seconds
+      // Fermeture automatique de la notification après 8 secondes
       setTimeout(() => setSmsNotification(null), 8000);
     }, 800);
   };
 
-  // Validate SMS OTP Login
+  // Valider la connexion par OTP SMS
   const handleOtpLogin = (e) => {
     e.preventDefault();
     setError('');
@@ -246,7 +246,7 @@ export default function DriverLogin() {
     triggerError("Remplissage automatique. Appuyez sur Se connecter.");
   };
 
-  // Simulation parameters for Magic link
+  // Paramètres de simulation pour le lien magique
   const simulateMagicLink = (driverId) => {
     setValidatingToken(true);
     setTimeout(() => {
@@ -275,7 +275,7 @@ export default function DriverLogin() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-0 sm:p-6 select-none font-sans relative overflow-hidden bg-slate-50 text-slate-800">
       
-      {/* Styles for shake and keyframes */}
+      {/* Styles pour les animations de secousse et les keyframes */}
       <style>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
@@ -294,7 +294,7 @@ export default function DriverLogin() {
         }
       `}</style>
 
-      {/* --- WHATSAPP SIMULATED SMS TOAST --- */}
+      {/* --- NOTIFICATION SMS SIMULÉE --- */}
       {smsNotification && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 w-[92%] max-w-xs bg-white border border-slate-200 text-slate-900 rounded-3xl p-4 shadow-xl z-50 flex gap-3.5 animate-sms-toast">
           <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
@@ -310,7 +310,7 @@ export default function DriverLogin() {
         </div>
       )}
 
-      {/* Magic link loading overlay */}
+      {/* Superposition de chargement du lien magique */}
       {validatingToken && (
         <div className="fixed inset-0 bg-[#F8FAFC]/95 backdrop-blur-md z-50 flex flex-col items-center justify-center text-center p-6">
           <div className="w-20 h-20 rounded-full bg-[#6D4AFF]/10 border border-[#6D4AFF]/20 flex items-center justify-center mb-6">
@@ -323,16 +323,16 @@ export default function DriverLogin() {
         </div>
       )}
 
-      {/* Smartphone frame container */}
+      {/* Conteneur du cadre de smartphone */}
       <div className="w-full h-full min-h-screen sm:min-h-[740px] sm:max-w-[390px] overflow-hidden sm:shadow-2xl relative flex flex-col sm:border-[8px] sm:border-slate-250 sm:rounded-[50px] bg-[#F8FAFC] text-[#0F172A] shadow-slate-300/40">
         
-        {/* Phone Notch */}
+        {/* Encoche du smartphone */}
         <div className="hidden sm:flex h-5.5 w-32 mx-auto rounded-b-2xl absolute top-0 left-1/2 -translate-x-1/2 z-40 items-center justify-center bg-slate-200">
           <span className="w-3 h-3 rounded-full bg-black/95 block mr-3"></span>
           <span className="w-8 h-1 rounded bg-black/20 block"></span>
         </div>
 
-        {/* Status Bar */}
+        {/* Barre de statut supérieure */}
         <div className="pt-3 sm:pt-6 px-6 pb-2 flex justify-between items-center text-[10px] font-mono z-30 font-semibold text-slate-500 bg-[#F8FAFC]">
           <span>19:58</span>
           <div className="flex gap-2 items-center">
@@ -343,17 +343,17 @@ export default function DriverLogin() {
           </div>
         </div>
 
-        {/* Smartphone Screen Body */}
+        {/* Écran interne du smartphone */}
         <div className="flex-1 flex flex-col justify-between p-6 relative overflow-y-auto bg-[#F8FAFC]">
           
-          {/* Top header navigation inside smartphone */}
+          {/* Navigation supérieure interne */}
           <div className="relative z-20 flex items-center justify-center mt-2">
             <span className="text-[11px] font-semibold border border-[#6D4AFF]/20 px-3.5 py-1 rounded-full uppercase tracking-wider bg-[#6D4AFF]/5 text-[#6D4AFF]">
               🚖 Versé Chauffeur
             </span>
           </div>
 
-          {/* Form Container */}
+          {/* Conteneur du formulaire principal */}
           <div className={`relative z-20 flex-1 flex flex-col justify-center my-auto py-6 space-y-5 ${shake ? 'shake-element' : ''}`}>
             <div className="text-center space-y-2">
               <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2 bg-[#6D4AFF]/5 text-[#6D4AFF]">
@@ -368,7 +368,7 @@ export default function DriverLogin() {
 
             </div>
 
-            {/* Error notifications */}
+            {/* Notifications d'erreur */}
             {(error || magicLinkError) && (
               <div className="bg-red-50 border border-red-200 text-red-650 text-xs p-3 rounded-2xl flex gap-2.5 font-semibold animate-fadeIn">
                 <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
@@ -376,7 +376,7 @@ export default function DriverLogin() {
               </div>
             )}
 
-            {/* Lockout status indicator */}
+            {/* Indicateur du statut de verrouillage */}
             {lockoutTime > 0 && (
               <div className="bg-amber-50 border border-amber-200 text-amber-850 text-xs p-3.5 rounded-2xl flex flex-col gap-1 items-center text-center font-semibold">
                 <ShieldAlert className="w-5 h-5 text-amber-500 animate-pulse" />
@@ -385,7 +385,7 @@ export default function DriverLogin() {
               </div>
             )}
 
-            {/* Login Fields Form */}
+            {/* Formulaire des champs de connexion */}
             {loginMode === 'pin' ? (
               <form onSubmit={handlePinLogin} className="space-y-3">
                 <div className="space-y-1">
@@ -436,7 +436,7 @@ export default function DriverLogin() {
                 </button>
               </form>
             ) : (
-              /* SMS OTP Mode Form */
+              /* Formulaire du mode OTP SMS */
               <form onSubmit={otpSent ? handleOtpLogin : handleRequestOtp} className="space-y-3">
                 <div className="space-y-1">
                   <div className="relative">
@@ -495,7 +495,7 @@ export default function DriverLogin() {
               </form>
             )}
 
-            {/* Toggle Login Method */}
+            {/* Changement de la méthode de connexion */}
             <button
               onClick={() => {
                 setLoginMode(loginMode === 'pin' ? 'otp' : 'pin');
@@ -508,7 +508,7 @@ export default function DriverLogin() {
               {loginMode === 'pin' ? "S'authentifier plutôt par code SMS (OTP)" : "S'authentifier plutôt par code PIN"}
             </button>
 
-            {/* Collapsible Demo Tools */}
+            {/* Outils de démonstration pliables */}
             <div className="border border-slate-150 rounded-3xl bg-white shadow-sm overflow-hidden">
               <button
                 type="button"
@@ -524,7 +524,7 @@ export default function DriverLogin() {
 
               {showDevTools && (
                 <div className="px-4 pb-4 pt-1 border-t border-slate-100 space-y-3 animate-fade-in">
-                  {/* Magic Link Simulator */}
+                  {/* Simulateur de lien magique */}
                   <div className="space-y-1.5">
                     <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
                       Simulateur Magic Link (WhatsApp)
@@ -575,7 +575,7 @@ export default function DriverLogin() {
 
           </div>
 
-          {/* Footer inside mobile frame */}
+          {/* Pied de page interne au smartphone */}
           <div className="text-center pt-4 border-t border-slate-100 text-[9px] font-semibold mt-auto flex flex-col gap-0.5 text-slate-400">
             <span>PORTAIL MOBILE VERSÉ v2.0</span>
             <span>Sécurité HTTPS • Cryptage de bout en bout</span>
@@ -585,7 +585,7 @@ export default function DriverLogin() {
 
       </div>
 
-      {/* Switch link back to owner space */}
+      {/* Bouton de retour vers l'espace propriétaire */}
       <button 
         onClick={() => navigate('/login')} 
         className="mt-6 text-xs font-bold transition-all cursor-pointer border border-slate-200 px-4 py-2.5 rounded-2xl shadow-sm mb-4 sm:mb-0 bg-white hover:bg-slate-50 text-slate-650"

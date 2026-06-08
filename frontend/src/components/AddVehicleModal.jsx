@@ -10,7 +10,7 @@ export default function AddVehicleModal({ isOpen, onClose, onAdd }) {
   const [driverPin, setDriverPin] = useState('');
   const [error, setError] = useState('');
 
-  // Success screen states
+  // États de l'écran de succès
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdDriver, setCreatedDriver] = useState(null); // { name, phone, magicLink }
   const [copied, setCopied] = useState(false);
@@ -49,7 +49,7 @@ export default function AddVehicleModal({ isOpen, onClose, onAdd }) {
     });
     setShowSuccess(true);
 
-    // Reset Form fields
+    // Réinitialiser les champs du formulaire
     setPlate('');
     setModel('');
     setMileage('');
@@ -58,7 +58,7 @@ export default function AddVehicleModal({ isOpen, onClose, onAdd }) {
     setDriverPin('');
   };
 
-  // Success view
+  // Vue de succès
   if (showSuccess && createdDriver) {
     const shareMessage = `Bonjour ${createdDriver.name}, voici ton lien d'accès sécurisé à ton espace chauffeur Kollëré : ${createdDriver.magicLink}`;
     const whatsappUrl = `https://wa.me/221${createdDriver.phone}?text=${encodeURIComponent(shareMessage)}`;
