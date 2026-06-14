@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { initDb } from './utils/mockDb';
 
-// Import our structured page views
+// Importation des vues de pages structurées
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import DriverLogin from './pages/DriverLogin';
@@ -12,25 +12,25 @@ import './App.css';
 
 function App() {
   useEffect(() => {
-    // Initialize the simulated database in localStorage on app load
+    // Initialisation de la base de données simulée dans localStorage au chargement de l'application
     initDb();
   }, []);
 
   return (
     <BrowserRouter>
       <Routes>
-        {/* Redirect home to owner login */}
+        {/* Redirection de l'accueil vers la connexion propriétaire */}
         <Route path="/" element={<Navigate to="/login" replace />} />
         
-        {/* Owner authentication and dashboard routes */}
+        {/* Routes d'authentification et de tableau de bord du propriétaire */}
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         
-        {/* Driver simplified PIN authentication and portal routes */}
+        {/* Routes du portail et d'authentification PIN simplifiée du chauffeur */}
         <Route path="/driver/login" element={<DriverLogin />} />
         <Route path="/driver/portal" element={<DriverPortal />} />
         
-        {/* Catch-all redirect to login */}
+        {/* Redirection globale vers la page de connexion */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

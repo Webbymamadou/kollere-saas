@@ -6,11 +6,11 @@ import taxiImage from '../assets/dakar_taxi_sunset.png';
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
   
-  // Login states
+  // États du formulaire de connexion
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
-  // Register states
+  // États du formulaire d'inscription
   const [name, setName] = useState('');
   const [fleetName, setFleetName] = useState('');
   const [phone, setPhone] = useState('');
@@ -30,11 +30,11 @@ export default function Login() {
       return;
     }
 
-    // Check custom registered owner or fallback demo owner
+    // Vérifier le profil du propriétaire enregistré ou utiliser le propriétaire de démonstration par défaut
     const registeredProfile = localStorage.getItem('verse_owner_profile');
     if (registeredProfile) {
       const profile = JSON.parse(registeredProfile);
-      if (email === profile.email && password === 'password') { // for testing ease, let any registered email match with 'password'
+      if (email === profile.email && password === 'password') { // pour faciliter les tests, n'importe quel email enregistré correspond au mot de passe 'password'
         localStorage.setItem('verse_auth_role', 'owner');
         navigate('/dashboard');
         return;
@@ -68,11 +68,11 @@ export default function Login() {
       return;
     }
 
-    // Save owner info in simulated database
+    // Sauvegarder les informations du propriétaire dans la base de données simulée
     const ownerProfile = { name, email, phone, fleetName };
     localStorage.setItem('verse_owner_profile', JSON.stringify(ownerProfile));
     
-    // Auto-login registered owner
+    // Connexion automatique du propriétaire inscrit
     localStorage.setItem('verse_auth_role', 'owner');
     navigate('/dashboard');
   };
@@ -98,13 +98,13 @@ export default function Login() {
         }
       `}</style>
 
-      {/* Background overlay */}
+      {/* Superposition d'arrière-plan */}
       <div className="absolute inset-0 bg-black/20 z-0"></div>
 
-      {/* Transparent card container */}
+      {/* Conteneur de carte transparent */}
       <div className={`relative z-10 w-full max-w-sm bg-white/[0.02] border border-white/10 rounded-2xl p-7 backdrop-blur-md shadow-xl text-center space-y-5 ${shake ? 'shake-element' : ''}`}>
         
-        {/* Header Icon */}
+        {/* Icône d'en-tête */}
         <div className="w-8 h-8 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center mx-auto border border-amber-400/25">
           <Car className="w-4.5 h-4.5" />
         </div>
@@ -123,7 +123,7 @@ export default function Login() {
           </div>
         )}
 
-        {/* Render Register View */}
+        {/* Rendu de la vue d'inscription */}
         {isRegister ? (
           <form onSubmit={handleRegister} className="space-y-3">
             
@@ -187,7 +187,7 @@ export default function Login() {
             
           </form>
         ) : (
-          /* Render Login View */
+          /* Rendu de la vue de connexion */
           <form onSubmit={handleLogin} className="space-y-4">
             
             <div className="space-y-1 text-left">
@@ -231,7 +231,7 @@ export default function Login() {
           </form>
         )}
 
-        {/* Bottom switcher link */}
+        {/* Liens de basculement inférieurs */}
         <div className="pt-4 border-t border-white/10 text-center flex flex-col gap-2.5">
           <button 
             onClick={() => {

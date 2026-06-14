@@ -5,7 +5,7 @@ export default function DriverTable({ drivers, vehicles, payments = [], onDelete
   const [copiedId, setCopiedId] = useState(null);
 
   const handleCopyMagicLink = (driver) => {
-    // Generate secure token URL using magic_token or fallback to id
+    // Générer l'URL de jeton sécurisé en utilisant le magic_token ou par défaut l'identifiant (id)
     const tokenVal = driver.magic_token || driver.id;
     const magicLink = window.location.origin + `/driver/login?token=${tokenVal}`;
     navigator.clipboard.writeText(magicLink).then(() => {
@@ -40,7 +40,7 @@ export default function DriverTable({ drivers, vehicles, payments = [], onDelete
             {drivers.map((d) => {
               const assignedVehicle = vehicles.find(v => v.id === d.vehicle_id);
 
-              // Calculate daily payments (today)
+              // Calculer les versements du jour (aujourd'hui)
               const todayStr = new Date().toISOString().split('T')[0];
               const driverPayments = payments.filter(p => 
                 p.status === 'approved' && 
@@ -49,19 +49,19 @@ export default function DriverTable({ drivers, vehicles, payments = [], onDelete
               );
               const totalPaidToday = driverPayments.reduce((sum, p) => sum + p.amount, 0);
               
-              // Check if they paid today
+              // Vérifier s'ils ont payé aujourd'hui
               const isPaid = d.paid_today !== undefined 
                 ? d.paid_today 
                 : totalPaidToday > 0;
 
               return (
                 <tr key={d.id} className="hover:bg-slate-950/50 transition-colors">
-                  {/* Name */}
+                  {/* Nom du chauffeur */}
                   <td className="py-3 px-3 font-semibold text-white text-xs whitespace-nowrap w-[15%]">
                     {d.name}
                   </td>
 
-                  {/* Phone / WhatsApp Links */}
+                  {/* Numéro de téléphone et liens WhatsApp */}
                   <td className="py-3 px-3 font-mono whitespace-nowrap w-[15%]">
                     <div className="flex items-center gap-2">
                       <a 
@@ -84,7 +84,7 @@ export default function DriverTable({ drivers, vehicles, payments = [], onDelete
                     </div>
                   </td>
 
-                  {/* Vehicle License Plate */}
+                  {/* Plaque d'immatriculation du véhicule assigné */}
                   <td className="py-3 px-3 whitespace-nowrap w-[20%]">
                     {assignedVehicle ? (
                       <div className="space-y-0.5">
@@ -98,7 +98,7 @@ export default function DriverTable({ drivers, vehicles, payments = [], onDelete
                     )}
                   </td>
 
-                  {/* Copy Magic Link & Revoke */}
+                  {/* Copie du lien magique et réinitialisation */}
                   <td className="py-3 px-3 whitespace-nowrap w-[25%]">
                     <div className="flex items-center gap-1.5">
                       <button 
@@ -126,7 +126,7 @@ export default function DriverTable({ drivers, vehicles, payments = [], onDelete
                     </div>
                   </td>
 
-                  {/* Daily Payment Toggle */}
+                  {/* Bascule de l'état de versement quotidien */}
                   <td className="py-3 px-3 whitespace-nowrap w-[15%]">
                     <div className="flex flex-col items-center">
                       {isPaid ? (
@@ -156,14 +156,14 @@ export default function DriverTable({ drivers, vehicles, payments = [], onDelete
                     </div>
                   </td>
 
-                  {/* Status */}
+                  {/* Statut */}
                   <td className="py-3 px-3 whitespace-nowrap w-[10%]">
                     <span className="inline-block px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                       {d.status || 'actif'}
                     </span>
                   </td>
 
-                  {/* Actions (Deactivate button) */}
+                  {/* Actions (Bouton désactiver) */}
                   <td className="py-3 px-3 text-right whitespace-nowrap w-[10%]">
                     <button 
                       onClick={() => {

@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasUuid;
+use App\Traits\BelongsToTenant;
 
 class AuditLog extends Model
 {
+    use HasUuid, BelongsToTenant;
+
     // Pas de colonne updated_at
     const UPDATED_AT = null;
 
