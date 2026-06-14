@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasUuid;
+use App\Traits\BelongsToTenant;
+use Laravel\Sanctum\HasApiTokens;
 
 class Driver extends Model
 {
-    // TODO: Utiliser le trait BelongsToTenant pour l'isolation multi-tenant
+    use HasUuid, BelongsToTenant, HasApiTokens;
 
     protected $fillable = [
         'vehicle_id',
