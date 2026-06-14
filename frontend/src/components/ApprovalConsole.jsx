@@ -55,7 +55,7 @@ export default function ApprovalConsole({
                   </div>
                 </div>
                 
-                {/* Actions & Receipt View */}
+                {/* Actions et vue du reçu de versement */}
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-white/5">
                   <button 
                     onClick={() => setSelectedReceipt(pay)}

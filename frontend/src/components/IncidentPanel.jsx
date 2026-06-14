@@ -40,7 +40,7 @@ export default function IncidentPanel({ incidents, drivers = [], onResolveIncide
                   <span>{inc.date}</span>
                 </div>
 
-                {/* Contact and Resolution Actions */}
+                {/* Actions de contact et de résolution d'incident */}
                 <div className="flex items-center justify-between gap-2 border-t border-white/5 pt-2.5">
                   <div className="flex items-center gap-1.5">
                     {driver && (

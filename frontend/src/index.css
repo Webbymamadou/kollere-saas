@@ -21,7 +21,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbar styling for a cleaner look */
+/* Personnalisation de la barre de défilement pour un design plus propre */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -40,7 +40,7 @@ html, body {
   background: #CBD5E1;
 }
 
-/* Animations */
+/* Déclarations des animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
@@ -68,7 +68,7 @@ html, body {
   animation: pulseBorder 2s infinite ease-in-out;
 }
 
-/* Car ride animation preserved from original specification */
+/* Animation du trajet de voiture conservée de la spécification originale */
 @keyframes car-ride {
   0%, 100% { transform: translateX(0) translateY(0); }
   25% { transform: translateX(2px) translateY(-0.5px); }
@@ -84,7 +84,7 @@ html, body {
   animation: car-ride 0.4s infinite linear;
 }
 
-/* Glassmorphism helpers */
+/* Utilitaires pour l'effet de flou (Glassmorphism) */
 .glass-effect {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
