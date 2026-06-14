@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasUuid;
+use App\Traits\BelongsToTenant;
 
 class Vehicle extends Model
 {
-    // TODO: Utiliser le trait BelongsToTenant pour l'isolation multi-tenant
+    use HasUuid, BelongsToTenant;
 
     protected $fillable = [
         'user_id',

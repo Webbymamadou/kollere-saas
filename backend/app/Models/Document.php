@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasUuid;
+use App\Traits\BelongsToTenant;
 
 class Document extends Model
 {
+    use HasUuid, BelongsToTenant;
+
     protected $fillable = [
         'vehicle_id',
         'type',
