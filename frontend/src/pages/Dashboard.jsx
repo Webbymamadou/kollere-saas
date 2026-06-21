@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 
 import { getFromDb, saveToDb } from '../utils/mockDb';
+import { useAuth } from '../contexts/AuthContext';
 
 // Importation des boîtes modales améliorées
 import ReceiptModal from '../components/ReceiptModal';
@@ -63,6 +64,7 @@ ChartJS.register(
 );
 
 export default function Dashboard() {
+  const { logout } = useAuth();
   const [vehicles, setVehicles] = useState(() => getFromDb('vehicles', []));
   const [drivers, setDrivers] = useState(() => getFromDb('drivers', []));
   const [payments, setPayments] = useState(() => getFromDb('payments', []));
@@ -382,7 +384,7 @@ export default function Dashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('verse_auth_role');
+    logout();
     navigate('/login');
   };
 

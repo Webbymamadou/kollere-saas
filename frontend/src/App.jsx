@@ -6,7 +6,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 // Import views
 import Landing from './pages/Landing';
 import Login from './pages/Login';
-import Dashboard from './components/Dashboard';
+import Dashboard from './pages/Dashboard';
 import DriverLogin from './pages/DriverLogin';
 import DriverPortal from './pages/DriverPortal';
 import Subscription from './pages/Subscription';
