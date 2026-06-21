@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasUuid;
 use App\Traits\BelongsToTenant;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Driver extends Model
 {
-    use HasUuid, BelongsToTenant, HasApiTokens;
+    use HasUuid, BelongsToTenant, HasApiTokens, HasFactory;
 
     protected $fillable = [
         'vehicle_id',
@@ -20,6 +22,22 @@ class Driver extends Model
         'magic_token',
         'daily_income',
     ];
+
+    protected $hidden = [
+        'pin_code',
+    ];
+
+    // Automatically hash the PIN when setting it
+    public function setPinCodeAttribute($value)
+    {
+        $this->attributes['pin_code'] = Hash::make($value);
+    }
+
+    // Verify the PIN
+    public function checkPin($pin)
+    {
+        return Hash::check($pin, $this->pin_code);
+    }
 
     public function vehicle()
     {

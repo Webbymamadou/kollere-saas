@@ -81,7 +81,7 @@ class DatabaseSeeder extends Seeder
             ],
         ]);
 
-        // 3. Création des chauffeurs
+        // 3. Création des chauffeurs (PINs hachés)
         $d1Id = (string) Str::uuid();
         $d2Id = (string) Str::uuid();
         $d3Id = (string) Str::uuid();
@@ -92,7 +92,7 @@ class DatabaseSeeder extends Seeder
                 'vehicle_id' => $v1Id,
                 'name' => 'Moussa Diop',
                 'phone' => '771234567',
-                'pin_code' => '1234',
+                'pin_code' => Hash::make('1234'),
                 'status' => 'active',
                 'magic_token' => 'mt_moussa_8a7b9c2d3e4f',
                 'daily_income' => 42500.00,
@@ -104,7 +104,7 @@ class DatabaseSeeder extends Seeder
                 'vehicle_id' => $v2Id,
                 'name' => 'Amadou Sow',
                 'phone' => '779876543',
-                'pin_code' => '5678',
+                'pin_code' => Hash::make('5678'),
                 'status' => 'active',
                 'magic_token' => 'mt_amadou_1e2f3g4h5i6j',
                 'daily_income' => 38000.00,
@@ -116,7 +116,7 @@ class DatabaseSeeder extends Seeder
                 'vehicle_id' => $v3Id,
                 'name' => 'Ibrahima Ndiaye',
                 'phone' => '764532109',
-                'pin_code' => '0000',
+                'pin_code' => Hash::make('0000'),
                 'status' => 'active',
                 'magic_token' => 'mt_ibrahima_9x8y7z6w5v4u',
                 'daily_income' => 0.00,

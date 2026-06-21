@@ -56,19 +56,58 @@ export default function DriverPortal() {
     const driverId = localStorage.getItem('verse_auth_driver_id');
     const role = localStorage.getItem('verse_auth_role');
     if (role !== 'driver' || !driverId) return null;
+    
     const drivers = getFromDb('drivers', []);
-    return drivers.find(d => d.id === driverId) || null;
+    let found = drivers.find(d => d.id === driverId);
+    if (!found) {
+      const storedDriver = localStorage.getItem('verse_auth_driver_data');
+      if (storedDriver) {
+        try {
+          const parsed = JSON.parse(storedDriver);
+          found = drivers.find(d => d.phone === parsed.phone || d.name === parsed.name);
+          if (found) {
+            return { ...found, id: driverId };
+          }
+          return parsed;
+        } catch (e) {}
+      }
+    }
+    return found || null;
   });
 
   const [vehicle, setVehicle] = useState(() => {
     const driverId = localStorage.getItem('verse_auth_driver_id');
     const role = localStorage.getItem('verse_auth_role');
     if (role !== 'driver' || !driverId) return null;
+    
     const drivers = getFromDb('drivers', []);
-    const foundDriver = drivers.find(d => d.id === driverId);
-    if (!foundDriver) return null;
-    const vehicles = getFromDb('vehicles', []);
-    return vehicles.find(v => v.id === foundDriver.vehicle_id) || null;
+    let foundDriver = drivers.find(d => d.id === driverId);
+    if (!foundDriver) {
+      const storedDriver = localStorage.getItem('verse_auth_driver_data');
+      if (storedDriver) {
+        try {
+          const parsed = JSON.parse(storedDriver);
+          foundDriver = drivers.find(d => d.phone === parsed.phone || d.name === parsed.name);
+        } catch (e) {}
+      }
+    }
+    
+    if (foundDriver) {
+      const vehicles = getFromDb('vehicles', []);
+      const foundVehicle = vehicles.find(v => v.id === foundDriver.vehicle_id);
+      if (foundVehicle) return foundVehicle;
+    }
+    
+    const storedDriver = localStorage.getItem('verse_auth_driver_data');
+    if (storedDriver) {
+      try {
+        const parsed = JSON.parse(storedDriver);
+        if (parsed && parsed.vehicle) {
+          return parsed.vehicle;
+        }
+      } catch (e) {}
+    }
+    return null;
   });
 
   const [payments, setPayments] = useState(() => getFromDb('payments', []));
@@ -248,7 +287,7 @@ export default function DriverPortal() {
           const myVeh = newVal.find(v => v.id === vehicle.id);
           if (myVeh) {
             setVehicle(myVeh);
-            const driven = myVeh.current_mileage - myVeh.last_oil_change_mileage;
+            const driven = myVeh.current_mileage - (myVeh.last_oil_change_mileage || 0);
             if (driven >= 4500) {
               triggerToast("🔧 Rappel d'Entretien", "Vidange moteur requise bientôt (limite approchée).", 'warning');
               addNewNotification('🔧 Maintenance requise', 'Vidange moteur à prévoir bientôt.');
@@ -530,7 +569,7 @@ export default function DriverPortal() {
 
   const devTriggerOilChangeWarning = () => {
     if (vehicle) {
-      const updatedVehicle = { ...vehicle, current_mileage: vehicle.last_oil_change_mileage + 4800 };
+      const updatedVehicle = { ...vehicle, current_mileage: (vehicle.last_oil_change_mileage || 0) + 4800 };
       setVehicle(updatedVehicle);
       const vehiclesList = getFromDb('vehicles', []);
       const updatedList = vehiclesList.map(v => v.id === vehicle.id ? updatedVehicle : v);
@@ -1307,15 +1346,15 @@ export default function DriverPortal() {
                 <div className="grid grid-cols-2 gap-3 border-t border-slate-100 pt-3.5 text-xs font-semibold">
                   <div className="space-y-0.5 text-left">
                     <span className="text-[9px] text-slate-450 uppercase font-bold tracking-wider block">Odomètre</span>
-                    <strong className="block font-mono text-slate-800">{vehicle.current_mileage.toLocaleString()} km</strong>
+                    <strong className="block font-mono text-slate-800">{(vehicle.current_mileage || 0).toLocaleString()} km</strong>
                   </div>
                   <div className="space-y-0.5 text-left">
                     <span className="text-[9px] text-slate-450 uppercase font-bold tracking-wider block">Dernière vidange</span>
-                    <strong className="block font-mono text-slate-800">{vehicle.last_oil_change_mileage.toLocaleString()} km</strong>
+                    <strong className="block font-mono text-slate-800">{(vehicle.last_oil_change_mileage || 0).toLocaleString()} km</strong>
                   </div>
                   <div className="space-y-0.5 text-left">
                     <span className="text-[9px] text-slate-450 uppercase font-bold tracking-wider block">Prochaine maintenance</span>
-                    <strong className="block font-mono text-slate-800">{(vehicle.last_oil_change_mileage + 5000).toLocaleString()} km</strong>
+                    <strong className="block font-mono text-slate-800">{((vehicle.last_oil_change_mileage || 0) + 5000).toLocaleString()} km</strong>
                   </div>
                   <div className="space-y-0.5 text-left">
                     <span className="text-[9px] text-slate-450 uppercase font-bold tracking-wider block">Statut mécanique</span>
@@ -1486,62 +1525,7 @@ export default function DriverPortal() {
                 </div>
               )}
 
-              {/* Panneau repliable des outils de développement */}
-              <div className="bg-white border border-slate-100 rounded-3xl p-2.5 shadow-xs text-left">
-                <button
-                  type="button"
-                  onClick={() => setShowDevPanel(!showDevPanel)}
-                  className="w-full flex justify-between items-center p-2.5 font-bold text-xs text-slate-650 hover:text-slate-800 transition-colors cursor-pointer"
-                >
-                  <span className="flex items-center gap-1.5 text-slate-700">⚙️ Simulateur de Démo (Dev Tools)</span>
-                  <span className="text-slate-400">{showDevPanel ? '▲' : '▼'}</span>
-                </button>
 
-                {showDevPanel && (
-                  <div className="p-2 pt-3.5 border-t border-slate-100 mt-2 space-y-3 animate-fadeIn text-[10px]">
-                    <p className="text-[9.5px] text-slate-550 font-semibold leading-relaxed text-left">
-                      Actions rapides pour simuler les approbations du propriétaire sans passer par son interface.
-                    </p>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <button 
-                        onClick={devApproveLatestPayment}
-                        className="bg-green-50 border border-green-200 text-green-700 font-bold py-2 rounded-xl cursor-pointer hover:bg-green-100/40 transition-colors text-center"
-                      >
-                        👍 Valider versement
-                      </button>
-
-                      <button 
-                        onClick={devRejectLatestPayment}
-                        className="bg-red-50 border border-red-200 text-red-700 font-bold py-2 rounded-xl cursor-pointer hover:bg-red-100/40 transition-colors text-center"
-                      >
-                        👎 Rejeter versement
-                      </button>
-
-                      <button 
-                        onClick={devTriggerOilChangeWarning}
-                        className="bg-amber-50 border border-amber-250 text-[#F59E0B] font-bold py-2.5 rounded-xl cursor-pointer hover:bg-amber-100/40 transition-colors text-center col-span-2"
-                      >
-                        🔧 Simuler Vidange Requise (+4800 km)
-                      </button>
-
-                      <button 
-                        onClick={devSimulateMagicLinkExpiry}
-                        className="bg-purple-50 border border-purple-100 text-[#6D4AFF] font-bold py-2.5 rounded-xl cursor-pointer hover:bg-purple-100/30 transition-colors text-center col-span-2"
-                      >
-                        🔗 Simuler Magic Link WhatsApp Expiré
-                      </button>
-
-                      <button 
-                        onClick={devResetDatabase}
-                        className="bg-slate-50 border border-slate-250 text-slate-650 font-bold py-2 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors text-center col-span-2"
-                      >
-                        🔄 Reset Database
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
 
               {/* Bouton de déconnexion */}
               <button 
@@ -1594,15 +1578,7 @@ export default function DriverPortal() {
 
       </div>
 
-      {/* Bouton de basculement */}
-      <div className="flex gap-4">
-        <button 
-          onClick={() => navigate('/dashboard')} 
-          className="mt-6 text-xs font-bold transition-all cursor-pointer border border-slate-200 px-4 py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-650 shadow-sm active:scale-95"
-        >
-          Dashboard Propriétaire (Web) 🖥️
-        </button>
-      </div>
+
 
       {/* Fenêtre modale des options SOS */}
       {showSosDialog && (

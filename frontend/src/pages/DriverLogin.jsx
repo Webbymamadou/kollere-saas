@@ -3,56 +3,43 @@ import { useNavigate } from 'react-router-dom';
 import { 
   LogIn, 
   Lock, 
-  UserCheck, 
-  KeyRound, 
-  MessageSquareCode, 
-  Sun, 
-  Moon, 
   Smartphone, 
-  Link2, 
   Loader2, 
   ShieldAlert,
   Eye,
-  EyeOff
+  EyeOff,
+  ArrowLeft
 } from 'lucide-react';
-import { getFromDb, saveToDb } from '../utils/mockDb';
+import apiService from '../services/api';
 
 export default function DriverLogin() {
   const [phone, setPhone] = useState('');
   const [pin, setPin] = useState('');
   const [showPin, setShowPin] = useState(false);
   
-  // États pour le flux OTP
   const [loginMode, setLoginMode] = useState('pin'); // 'pin' ou 'otp'
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
-  const [generatedOtp, setGeneratedOtp] = useState('');
-  const [smsNotification, setSmsNotification] = useState(null); // { body }
 
-  // États de verrouillage de sécurité (anti-brute-force)
   const [failedAttempts, setFailedAttempts] = useState(0);
-  const [lockoutTime, setLockoutTime] = useState(0); // in seconds
+  const [lockoutTime, setLockoutTime] = useState(0);
   
-  // État de validation du lien magique
   const [validatingToken, setValidatingToken] = useState(false);
   const [magicLinkError, setMagicLinkError] = useState('');
 
-  // États pour le style et les erreurs
-  const [darkMode, setDarkMode] = useState(true);
   const [error, setError] = useState('');
   const [shake, setShake] = useState(false);
-  const [showDevTools, setShowDevTools] = useState(false);
+  const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
 
-  // Minuteur de décompte pour le verrouillage temporaire
   useEffect(() => {
     if (lockoutTime <= 0) return;
     const interval = setInterval(() => {
       setLockoutTime(prev => {
         if (prev <= 1) {
           clearInterval(interval);
-          setFailedAttempts(0); // Reset attempts on expiry
+          setFailedAttempts(0);
           return 0;
         }
         return prev - 1;
@@ -61,48 +48,29 @@ export default function DriverLogin() {
     return () => clearInterval(interval);
   }, [lockoutTime]);
 
-  // Connexion automatique via jeton de lien magique au chargement
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     if (token) {
-      // Utiliser un setTimeout pour différer le setState hors du flux de rendu
-      const timer = setTimeout(() => {
+      const timer = setTimeout(async () => {
         setValidatingToken(true);
-        setTimeout(() => {
-          const drivers = getFromDb('drivers', []);
-          const driver = drivers.find(d => 
-            (d.magic_token && d.magic_token === token.trim()) || 
-            d.id === token.trim()
-          );
-          if (driver) {
-            // Enregistrer l'audit de sécurité
-            const audits = getFromDb('audits', []);
-            const newAudit = {
-              id: 'au_' + Date.now(),
-              date: new Date().toLocaleDateString('fr-FR') + ' ' + new Date().toLocaleTimeString('fr-FR').substring(0, 5),
-              type: 'login_magic',
-              driver_name: driver.name,
-              details: 'Connexion réussie via Magic Link WhatsApp'
-            };
-            saveToDb('audits', [newAudit, ...audits]);
-
-            localStorage.setItem('verse_auth_role', 'driver');
-            localStorage.setItem('verse_auth_driver_id', driver.id);
-            setValidatingToken(false);
-            navigate('/driver/portal');
-          } else {
-            setValidatingToken(false);
-            setMagicLinkError("Lien magique invalide ou expiré.");
-            setTimeout(() => setMagicLinkError(''), 5000);
-          }
-        }, 1500); // Délai simulé pour l'aspect de vérification de sécurité premium
+        try {
+          const response = await apiService.driverLogin({ token });
+          localStorage.setItem('verse_auth_role', 'driver');
+          localStorage.setItem('verse_auth_driver_id', response.driver.id);
+          localStorage.setItem('verse_auth_driver_data', JSON.stringify(response.driver));
+          setValidatingToken(false);
+          navigate('/driver/portal');
+        } catch (err) {
+          setValidatingToken(false);
+          setMagicLinkError("Lien magique invalide ou expiré.");
+          setTimeout(() => setMagicLinkError(''), 5000);
+        }
       }, 0);
       return () => clearTimeout(timer);
     }
   }, [navigate]);
 
-  // Fonction utilitaire pour déclencher une erreur avec animation de secousse
   const triggerError = (msg) => {
     setShake(true);
     setError(msg);
@@ -110,8 +78,7 @@ export default function DriverLogin() {
     setTimeout(() => setError(''), 4000);
   };
 
-  // Gérer la connexion classique par code PIN
-  const handlePinLogin = (e) => {
+  const handlePinLogin = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -125,473 +92,169 @@ export default function DriverLogin() {
       return;
     }
 
-    const drivers = getFromDb('drivers', []);
-    const driver = drivers.find(d => d.phone === phone.trim() && d.pin_code === pin.trim());
-
-    if (driver) {
-      // Log security audit
-      const audits = getFromDb('audits', []);
-      const newAudit = {
-        id: 'au_' + Date.now(),
-        date: new Date().toLocaleDateString('fr-FR') + ' ' + new Date().toLocaleTimeString('fr-FR').substring(0, 5),
-        type: 'login_pin',
-        driver_name: driver.name,
-        details: 'Connexion réussie via numéro de téléphone et PIN'
-      };
-      saveToDb('audits', [newAudit, ...audits]);
-
+    setLoading(true);
+    try {
+      const response = await apiService.driverLogin({ phone, pin_code: pin });
       localStorage.setItem('verse_auth_role', 'driver');
-      localStorage.setItem('verse_auth_driver_id', driver.id);
+      localStorage.setItem('verse_auth_driver_id', response.driver.id);
+      localStorage.setItem('verse_auth_driver_data', JSON.stringify(response.driver));
       setFailedAttempts(0);
       navigate('/driver/portal');
-    } else {
+    } catch (err) {
       const nextFailures = failedAttempts + 1;
       setFailedAttempts(nextFailures);
       setPin('');
       
-      if (nextFailures >= 3) {
-        setLockoutTime(30); // block for 30s
-        triggerError("Trop de tentatives incorrectes. Clavier verrouillé pour 30s.");
+      if (nextFailures >= 5) {
+        setLockoutTime(300);
+        triggerError("Trop de tentatives. Compte bloqué 5 minutes.");
       } else {
-        triggerError(`Code PIN incorrect. Tentatives restantes : ${3 - nextFailures}`);
+        triggerError(err.message || "Numéro ou PIN incorrect.");
       }
+      setLoading(false);
     }
   };
 
-  // Proposer/Générer le code OTP SMS simulé
-  const handleRequestOtp = (e) => {
-    e.preventDefault();
-    setError('');
-
-    if (!phone) {
-      triggerError("Veuillez saisir votre numéro de téléphone.");
-      return;
-    }
-
-    const drivers = getFromDb('drivers', []);
-    const driver = drivers.find(d => d.phone === phone.trim());
-
-    if (!driver) {
-      triggerError("Ce numéro ne correspond à aucun chauffeur enregistré.");
-      return;
-    }
-
-    // Generate a random 4 digit code
-    const code = Math.floor(1000 + Math.random() * 9000).toString();
-    setGeneratedOtp(code);
-    setOtpSent(true);
-
-    // Simuler l'affichage de notification de réception du SMS
-    setTimeout(() => {
-      setSmsNotification({
-        body: `[SMS Versé] Votre code de connexion sécurisé est : ${code}`
-      });
-      // Fermeture automatique de la notification après 8 secondes
-      setTimeout(() => setSmsNotification(null), 8000);
-    }, 800);
-  };
-
-  // Valider la connexion par OTP SMS
-  const handleOtpLogin = (e) => {
-    e.preventDefault();
-    setError('');
-
-    if (lockoutTime > 0) {
-      triggerError(`Connexion bloquée. Réessayez dans ${lockoutTime} secondes.`);
-      return;
-    }
-
-    if (!otpCode) {
-      triggerError("Veuillez saisir le code reçu par SMS.");
-      return;
-    }
-
-    if (otpCode.trim() === generatedOtp) {
-      const drivers = getFromDb('drivers', []);
-      const driver = drivers.find(d => d.phone === phone.trim());
-      if (driver) {
-        // Log security audit
-        const audits = getFromDb('audits', []);
-        const newAudit = {
-          id: 'au_' + Date.now(),
-          date: new Date().toLocaleDateString('fr-FR') + ' ' + new Date().toLocaleTimeString('fr-FR').substring(0, 5),
-          type: 'login_otp',
-          driver_name: driver.name,
-          details: 'Connexion réussie via OTP SMS'
-        };
-        saveToDb('audits', [newAudit, ...audits]);
-
-        localStorage.setItem('verse_auth_role', 'driver');
-        localStorage.setItem('verse_auth_driver_id', driver.id);
-        setFailedAttempts(0);
-        navigate('/driver/portal');
-      }
-    } else {
-      const nextFailures = failedAttempts + 1;
-      setFailedAttempts(nextFailures);
-      setOtpCode('');
-      
-      if (nextFailures >= 3) {
-        setLockoutTime(30);
-        triggerError("Trop de tentatives incorrectes. Clavier verrouillé pour 30s.");
-      } else {
-        triggerError(`Code de validation SMS incorrect. Tentatives restantes : ${3 - nextFailures}`);
-      }
-    }
-  };
-
-  const selectDemoAccount = (demoPhone, demoPin) => {
-    setPhone(demoPhone);
-    setPin(demoPin);
-    triggerError("Remplissage automatique. Appuyez sur Se connecter.");
-  };
-
-  // Paramètres de simulation pour le lien magique
-  const simulateMagicLink = (driverId) => {
-    setValidatingToken(true);
-    setTimeout(() => {
-      const drivers = getFromDb('drivers', []);
-      const driver = drivers.find(d => d.id === driverId);
-      if (driver) {
-        // Log security audit
-        const audits = getFromDb('audits', []);
-        const newAudit = {
-          id: 'au_' + Date.now(),
-          date: new Date().toLocaleDateString('fr-FR') + ' ' + new Date().toLocaleTimeString('fr-FR').substring(0, 5),
-          type: 'login_magic_simulated',
-          driver_name: driver.name,
-          details: 'Connexion simulée via Magic Link WhatsApp'
-        };
-        saveToDb('audits', [newAudit, ...audits]);
-
-        localStorage.setItem('verse_auth_role', 'driver');
-        localStorage.setItem('verse_auth_driver_id', driver.id);
-        setValidatingToken(false);
-        navigate('/driver/portal');
-      }
-    }, 1500);
-  };
+  if (validatingToken) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-slate-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 p-8 text-center max-w-sm w-full">
+          <Loader2 className="w-12 h-12 text-[#6D4AFF] animate-spin mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-slate-900 mb-2">Vérification en cours</h3>
+          <p className="text-slate-600">Connexion via le lien magique...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-0 sm:p-6 select-none font-sans relative overflow-hidden bg-slate-50 text-slate-800">
-      
-      {/* Styles pour les animations de secousse et les keyframes */}
+    <div className="h-screen w-screen overflow-hidden bg-gradient-to-br from-slate-50 via-indigo-50 to-slate-100 flex items-center justify-center p-2 sm:p-4 font-sans">
       <style>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-6px); }
-          75% { transform: translateX(6px); }
+          20%, 60% { transform: translateX(-6px); }
+          40%, 80% { transform: translateX(6px); }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         .shake-element {
-          animation: shake 0.35s ease-in-out;
+          animation: shake 0.4s ease-in-out;
         }
-        @keyframes slideDown {
-          from { transform: translate(-50%, -30px); opacity: 0; }
-          to { transform: translate(-50%, 0); opacity: 1; }
-        }
-        .animate-sms-toast {
-          animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .fade-in-up {
+          animation: fadeInUp 0.5s ease-out forwards;
         }
       `}</style>
 
-      {/* --- NOTIFICATION SMS SIMULÉE --- */}
-      {smsNotification && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 w-[92%] max-w-xs bg-white border border-slate-200 text-slate-900 rounded-3xl p-4 shadow-xl z-50 flex gap-3.5 animate-sms-toast">
-          <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <MessageSquareCode className="w-5 h-5" />
-          </div>
-          <div className="flex-1 space-y-0.5">
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-650">SMS Réseau</span>
-              <span className="text-[8px] text-slate-400 font-mono">À l'instant</span>
-            </div>
-            <p className="text-[11.5px] font-semibold text-slate-800 leading-normal select-all">{smsNotification.body}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Superposition de chargement du lien magique */}
-      {validatingToken && (
-        <div className="fixed inset-0 bg-[#F8FAFC]/95 backdrop-blur-md z-50 flex flex-col items-center justify-center text-center p-6">
-          <div className="w-20 h-20 rounded-full bg-[#6D4AFF]/10 border border-[#6D4AFF]/20 flex items-center justify-center mb-6">
-            <Loader2 className="w-8 h-8 text-[#6D4AFF] animate-spin" />
-          </div>
-          <h3 className="text-lg font-bold text-slate-900">Validation de l'accès...</h3>
-          <p className="text-xs text-slate-500 mt-2 max-w-[240px] font-semibold leading-relaxed">
-            Connexion sécurisée en cours. Veuillez ne pas fermer l'application.
-          </p>
-        </div>
-      )}
-
-      {/* Conteneur du cadre de smartphone */}
-      <div className="w-full h-full min-h-screen sm:min-h-[740px] sm:max-w-[390px] overflow-hidden sm:shadow-2xl relative flex flex-col sm:border-[8px] sm:border-slate-250 sm:rounded-[50px] bg-[#F8FAFC] text-[#0F172A] shadow-slate-300/40">
-        
-        {/* Encoche du smartphone */}
-        <div className="hidden sm:flex h-5.5 w-32 mx-auto rounded-b-2xl absolute top-0 left-1/2 -translate-x-1/2 z-40 items-center justify-center bg-slate-200">
-          <span className="w-3 h-3 rounded-full bg-black/95 block mr-3"></span>
-          <span className="w-8 h-1 rounded bg-black/20 block"></span>
-        </div>
-
-        {/* Barre de statut supérieure */}
-        <div className="pt-3 sm:pt-6 px-6 pb-2 flex justify-between items-center text-[10px] font-mono z-30 font-semibold text-slate-500 bg-[#F8FAFC]">
-          <span>19:58</span>
-          <div className="flex gap-2 items-center">
-            <span>Orange SN 4G</span>
-            <div className="w-5.5 h-2.5 border border-slate-350 rounded-sm p-0.5 flex">
-              <div className="bg-emerald-500 h-full w-4/5 rounded-2xs"></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Écran interne du smartphone */}
-        <div className="flex-1 flex flex-col justify-between p-6 relative overflow-y-auto bg-[#F8FAFC]">
-          
-          {/* Navigation supérieure interne */}
-          <div className="relative z-20 flex items-center justify-center mt-2">
-            <span className="text-[11px] font-semibold border border-[#6D4AFF]/20 px-3.5 py-1 rounded-full uppercase tracking-wider bg-[#6D4AFF]/5 text-[#6D4AFF]">
-              🚖 Versé Chauffeur
-            </span>
-          </div>
-
-          {/* Conteneur du formulaire principal */}
-          <div className={`relative z-20 flex-1 flex flex-col justify-center my-auto py-6 space-y-5 ${shake ? 'shake-element' : ''}`}>
-            <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-2 bg-[#6D4AFF]/5 text-[#6D4AFF]">
-                {loginMode === 'pin' ? <Lock className="w-5.5 h-5.5" /> : <KeyRound className="w-5.5 h-5.5" />}
-              </div>
-              <h2 className="text-lg font-bold tracking-tight text-slate-900">
-                Espace Chauffeur
-              </h2>
-              <p className="text-xs max-w-[260px] mx-auto text-slate-500 font-medium leading-relaxed">
-                Connectez-vous pour transmettre vos versements et trajets journaliers.
-              </p>
-
-            </div>
-
-            {/* Notifications d'erreur */}
-            {(error || magicLinkError) && (
-              <div className="bg-red-50 border border-red-200 text-red-650 text-xs p-3 rounded-2xl flex gap-2.5 font-semibold animate-fadeIn">
-                <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
-                <span className="leading-snug">{error || magicLinkError}</span>
-              </div>
-            )}
-
-            {/* Indicateur du statut de verrouillage */}
-            {lockoutTime > 0 && (
-              <div className="bg-amber-50 border border-amber-200 text-amber-850 text-xs p-3.5 rounded-2xl flex flex-col gap-1 items-center text-center font-semibold">
-                <ShieldAlert className="w-5 h-5 text-amber-500 animate-pulse" />
-                <span>Clavier verrouillé pour des raisons de sécurité</span>
-                <span className="text-[10px] text-slate-500">Veuillez patienter : <strong className="font-mono text-amber-600 text-xs">{lockoutTime}s</strong></span>
-              </div>
-            )}
-
-            {/* Formulaire des champs de connexion */}
-            {loginMode === 'pin' ? (
-              <form onSubmit={handlePinLogin} className="space-y-3">
-                <div className="space-y-1">
-                  <div className="relative">
-                    <input 
-                      type="tel" 
-                      value={phone}
-                      disabled={lockoutTime > 0}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full border border-slate-200 rounded-2xl px-4 py-3.5 text-xs focus:outline-none focus:border-[#6D4AFF] focus:bg-white transition-all font-mono placeholder-slate-400 text-center tracking-wider font-semibold disabled:opacity-40 min-h-[48px] bg-slate-50 text-slate-800"
-                      placeholder="Téléphone (ex: 771234567)"
-                    />
-                    <Smartphone className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="relative">
-                    <input 
-                      type={showPin ? "text" : "password"} 
-                      maxLength={4}
-                      pattern="[0-9]*"
-                      inputMode="numeric"
-                      value={pin}
-                      disabled={lockoutTime > 0}
-                      onChange={(e) => setPin(e.target.value)}
-                      className="w-full border border-slate-200 rounded-2xl px-4 py-3.5 text-xs focus:outline-none focus:border-[#6D4AFF] focus:bg-white transition-all font-mono tracking-widest text-center placeholder-slate-400 font-semibold disabled:opacity-40 min-h-[48px] bg-slate-50 text-slate-800"
-                      placeholder="Code PIN à 4 chiffres"
-                    />
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
-                    <button
-                      type="button"
-                      onClick={() => setShowPin(!showPin)}
-                      className="absolute right-4 top-3 text-slate-400 hover:text-[#6D4AFF]"
-                    >
-                      {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <button 
-                  type="submit"
-                  disabled={lockoutTime > 0}
-                  className="w-full bg-[#6D4AFF] hover:bg-[#5636E5] text-white font-bold text-xs py-3.5 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] min-h-[48px] disabled:opacity-40"
-                >
-                  <LogIn className="w-4 h-4" />
-                  Se connecter
-                </button>
-              </form>
-            ) : (
-              /* Formulaire du mode OTP SMS */
-              <form onSubmit={otpSent ? handleOtpLogin : handleRequestOtp} className="space-y-3">
-                <div className="space-y-1">
-                  <div className="relative">
-                    <input 
-                      type="tel" 
-                      value={phone}
-                      disabled={otpSent || lockoutTime > 0}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full border border-slate-200 rounded-2xl px-4 py-3.5 text-xs focus:outline-none focus:border-[#6D4AFF] focus:bg-white transition-all font-mono placeholder-slate-400 text-center tracking-wider font-semibold disabled:opacity-40 min-h-[48px] bg-slate-50 text-slate-800"
-                      placeholder="Téléphone (ex: 771234567)"
-                    />
-                    <Smartphone className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
-                  </div>
-                </div>
-
-                {otpSent && (
-                  <div className="space-y-1 animate-fadeIn">
-                    <div className="relative">
-                      <input 
-                        type="text" 
-                        maxLength={4}
-                        pattern="[0-9]*"
-                        inputMode="numeric"
-                        value={otpCode}
-                        disabled={lockoutTime > 0}
-                        onChange={(e) => setOtpCode(e.target.value)}
-                        className="w-full border border-slate-200 rounded-2xl px-4 py-3.5 text-xs focus:outline-none focus:border-[#6D4AFF] focus:bg-white transition-all font-mono tracking-widest text-center placeholder-slate-400 font-semibold min-h-[48px] bg-slate-50 text-slate-800"
-                        placeholder="Code SMS reçu"
-                      />
-                      <KeyRound className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
-                    </div>
-                  </div>
-                )}
-
-                <button 
-                  type="submit"
-                  disabled={lockoutTime > 0}
-                  className="w-full bg-[#6D4AFF] hover:bg-[#5636E5] text-white font-bold text-xs py-3.5 rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] min-h-[48px] disabled:opacity-40"
-                >
-                  <KeyRound className="w-4 h-4" />
-                  {otpSent ? "Confirmer le code" : "Recevoir le code SMS"}
-                </button>
-
-                {otpSent && (
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      setOtpSent(false);
-                      setOtpCode('');
-                    }}
-                    className="w-full text-[10px] font-bold text-center mt-2 cursor-pointer text-slate-500 hover:text-[#6D4AFF] transition-colors"
-                  >
-                    Changer de numéro
-                  </button>
-                )}
-              </form>
-            )}
-
-            {/* Changement de la méthode de connexion */}
-            <button
-              onClick={() => {
-                setLoginMode(loginMode === 'pin' ? 'otp' : 'pin');
-                setOtpSent(false);
-                setOtpCode('');
-                setError('');
-              }}
-              className="text-[10px] font-bold text-center underline cursor-pointer text-[#6D4AFF] hover:text-[#5636E5] transition-colors"
-            >
-              {loginMode === 'pin' ? "S'authentifier plutôt par code SMS (OTP)" : "S'authentifier plutôt par code PIN"}
-            </button>
-
-            {/* Outils de démonstration pliables */}
-            <div className="border border-slate-150 rounded-3xl bg-white shadow-sm overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setShowDevTools(!showDevTools)}
-                className="w-full px-4 py-3 flex justify-between items-center text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
-              >
-                <span className="flex items-center gap-1.5">
-                  <UserCheck className="w-4 h-4 text-[#6D4AFF]" />
-                  Simulateurs & Remplissage démo
-                </span>
-                <span className="text-xs text-slate-400">{showDevTools ? '▲' : '▼'}</span>
-              </button>
-
-              {showDevTools && (
-                <div className="px-4 pb-4 pt-1 border-t border-slate-100 space-y-3 animate-fade-in">
-                  {/* Simulateur de lien magique */}
-                  <div className="space-y-1.5">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                      Simulateur Magic Link (WhatsApp)
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => simulateMagicLink('d1')}
-                        className="text-[10px] font-bold py-2 rounded-xl text-center active:scale-95 border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
-                      >
-                        🔗 Moussa
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => simulateMagicLink('d2')}
-                        className="text-[10px] font-bold py-2 rounded-xl text-center active:scale-95 border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
-                      >
-                        🔗 Amadou
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Quick demo account connections */}
-                  <div className="space-y-1.5">
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                      Remplissage Auto (Démo PIN) :
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button 
-                        type="button"
-                        onClick={() => selectDemoAccount('771234567', '1234')}
-                        className="w-full border border-slate-200 text-[10px] font-bold py-2 rounded-xl text-center transition-all active:scale-95 cursor-pointer bg-slate-50 text-slate-700 hover:bg-slate-100"
-                      >
-                        🚗 Moussa (v1)
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={() => selectDemoAccount('779876543', '5678')}
-                        className="w-full border border-slate-200 text-[10px] font-bold py-2 rounded-xl text-center transition-all active:scale-95 cursor-pointer bg-slate-50 text-slate-700 hover:bg-slate-100"
-                      >
-                        🚕 Amadou (v2)
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-          </div>
-
-          {/* Pied de page interne au smartphone */}
-          <div className="text-center pt-4 border-t border-slate-100 text-[9px] font-semibold mt-auto flex flex-col gap-0.5 text-slate-400">
-            <span>PORTAIL MOBILE VERSÉ v2.0</span>
-            <span>Sécurité HTTPS • Cryptage de bout en bout</span>
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* Bouton de retour vers l'espace propriétaire */}
       <button 
-        onClick={() => navigate('/login')} 
-        className="mt-6 text-xs font-bold transition-all cursor-pointer border border-slate-200 px-4 py-2.5 rounded-2xl shadow-sm mb-4 sm:mb-0 bg-white hover:bg-slate-50 text-slate-650"
+        onClick={() => navigate('/')} 
+        className="fixed top-4 left-4 flex items-center gap-1.5 text-slate-600 hover:text-[#6D4AFF] transition-colors z-50 text-xs"
       >
-        Espace Propriétaire (Web) 🖥️
+        <ArrowLeft className="w-4 h-4" />
+        <span className="font-semibold">Retour</span>
       </button>
+
+      <div className={`w-full max-w-sm mx-auto fade-in-up ${shake ? 'shake-element' : ''}`}>
+        <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-5 lg:p-5 max-h-[460px] overflow-y-auto">
+          
+          <div className="text-center mb-4 lg:mb-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-[#6D4AFF] to-indigo-700 rounded-xl flex items-center justify-center mx-auto mb-2 shadow-md shadow-[#6D4AFF]/20">
+              <Smartphone className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-lg lg:text-xl font-extrabold text-slate-900 mb-0.5">Portail Chauffeur</h2>
+            <p className="text-[11px] text-slate-500 font-medium">Connectez-vous pour accéder à votre espace</p>
+          </div>
+
+          {magicLinkError && (
+            <div className="mb-3 bg-red-50 border border-red-200 text-red-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-[11px]">
+              <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
+              <span className="font-semibold">{magicLinkError}</span>
+            </div>
+          )}
+
+          {error && (
+            <div className="mb-3 bg-red-50 border border-red-200 text-red-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-[11px]">
+              <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
+              <span className="font-semibold">{error}</span>
+            </div>
+          )}
+
+          {lockoutTime > 0 && (
+            <div className="mb-3 bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-lg text-center text-[11px]">
+              <p className="font-bold">Compte temporairement bloqué</p>
+              <p className="mt-0.5">Réessayez dans {Math.floor(lockoutTime / 60)}:{(lockoutTime % 60).toString().padStart(2, '0')}</p>
+            </div>
+          )}
+
+          <form onSubmit={handlePinLogin} className="space-y-2 lg:space-y-2">
+            
+            <div className="space-y-0.5">
+              <label className="text-[10px] font-bold text-slate-700 ml-1">Numéro de téléphone</label>
+              <div className="relative">
+                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input 
+                  type="tel" 
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#6D4AFF]/20 focus:border-[#6D4AFF] transition-all font-mono"
+                  placeholder="+221 77 123 45 67"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-0.5">
+              <label className="text-[10px] font-bold text-slate-700 ml-1">Code PIN</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input 
+                  type={showPin ? 'text' : 'password'} 
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
+                  maxLength={4}
+                  className="w-full pl-9 pr-9 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#6D4AFF]/20 focus:border-[#6D4AFF] transition-all text-center font-mono text-lg tracking-widest"
+                  placeholder="••••"
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPin(!showPin)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 border-0 bg-transparent cursor-pointer"
+                >
+                  {showPin ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            <button 
+              type="submit"
+              disabled={loading || lockoutTime > 0}
+              className="w-full bg-gradient-to-r from-[#6D4AFF] to-indigo-700 hover:from-[#5636E5] hover:to-indigo-800 text-white font-black py-2 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-[#6D4AFF]/10 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed text-[11px] mt-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Connexion...
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-3.5 h-3.5" />
+                  Se connecter
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-4 pt-3 border-t border-slate-200 text-center">
+            <button 
+              onClick={() => navigate('/login')} 
+              className="text-slate-500 hover:text-[#6D4AFF] font-bold text-[11px] transition-colors"
+            >
+              Espace propriétaire →
+            </button>
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 }

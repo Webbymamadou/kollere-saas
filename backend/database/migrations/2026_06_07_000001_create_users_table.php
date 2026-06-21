@@ -13,7 +13,9 @@ return new class extends Migration
     public function up(): void
     {
         // Activer l'extension UUID pour PostgreSQL
-        DB::statement('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+        }
 
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
@@ -26,8 +28,10 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Ajouter la contrainte CHECK sur le rôle après la création
-        DB::statement("ALTER TABLE users ADD CONSTRAINT chk_user_role CHECK (role IN ('owner', 'admin'))");
+        // Ajouter la contrainte CHECK sur le rôle après la création pour PostgreSQL
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE users ADD CONSTRAINT chk_user_role CHECK (role IN ('owner', 'admin'))");
+        }
     }
 
     /**

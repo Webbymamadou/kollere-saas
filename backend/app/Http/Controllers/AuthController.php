@@ -6,9 +6,51 @@ use App\Models\User;
 use App\Models\Driver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    /**
+     * Inscription sécurisée pour les nouveaux Propriétaires (avec essai gratuit)
+     */
+    public function ownerRegister(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'phone' => 'required|string|max:20',
+            'password' => 'required|string|min:6',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'password' => Hash::make($request->password),
+            'role' => 'owner',
+        ]);
+
+        // Start the 7-day free trial automatically!
+        $user->startTrial();
+
+        $token = $user->createToken('owner-token', ['role:owner'])->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'role' => $user->role,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'subscription_status' => $user->subscription_status,
+                'trial_start' => $user->trial_start,
+                'trial_end' => $user->trial_end,
+                'days_left_on_trial' => $user->days_left_on_trial,
+            ]
+        ], 201);
+    }
+
     /**
      * Connexion sécurisée pour les Propriétaires (Sanctum)
      */
@@ -43,6 +85,32 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'phone' => $user->phone,
+                'subscription_status' => $user->subscription_status,
+                'trial_start' => $user->trial_start,
+                'trial_end' => $user->trial_end,
+                'days_left_on_trial' => $user->days_left_on_trial,
+                'has_active_access' => $user->hasActiveAccess(),
+            ]
+        ]);
+    }
+
+    /**
+     * Get current authenticated user with subscription info
+     */
+    public function getMe(Request $request)
+    {
+        $user = $request->user();
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'subscription_status' => $user->subscription_status,
+                'trial_start' => $user->trial_start,
+                'trial_end' => $user->trial_end,
+                'days_left_on_trial' => $user->days_left_on_trial,
+                'has_active_access' => $user->hasActiveAccess(),
             ]
         ]);
     }
@@ -56,9 +124,9 @@ class AuthController extends Controller
         if ($request->has('magic_token') || $request->has('token')) {
             $tokenValue = $request->input('magic_token', $request->input('token'));
             
-            $driverQuery = Driver::where('magic_token', $tokenValue);
+            $driverQuery = Driver::withoutGlobalScopes()->where('magic_token', $tokenValue);
             
-            if (\Illuminate\Support\Str::isUuid($tokenValue)) {
+            if (Str::isUuid($tokenValue)) {
                 $driverQuery->orWhere('id', $tokenValue);
             }
             
@@ -76,11 +144,9 @@ class AuthController extends Controller
                 'pin_code' => 'required|string|size:4',
             ]);
 
-            $driver = Driver::where('phone', $request->phone)
-                ->where('pin_code', $request->pin_code)
-                ->first();
+            $driver = Driver::withoutGlobalScopes()->where('phone', $request->phone)->first();
 
-            if (!$driver) {
+            if (!$driver || !$driver->checkPin($request->pin_code)) {
                 return response()->json([
                     'message' => 'Code PIN ou numéro de téléphone incorrect.'
                 ], 401);
@@ -109,6 +175,8 @@ class AuthController extends Controller
                     'license_plate' => $vehicle->license_plate,
                     'brand_model' => $vehicle->brand_model,
                     'current_mileage' => $vehicle->current_mileage,
+                    'last_oil_change_mileage' => $vehicle->last_oil_change_mileage,
+                    'pending_mileage' => $vehicle->pending_mileage,
                 ] : null
             ]
         ]);
