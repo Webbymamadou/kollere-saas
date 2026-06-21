@@ -69,10 +69,7 @@ export default function Dashboard() {
   const [drivers, setDrivers] = useState(() => getFromDb('drivers', []));
   const [payments, setPayments] = useState(() => getFromDb('payments', []));
   const [maintenances] = useState(() => {
-    const initialMaintenances = [
-      { id: 'm1', vehicle_id: 'v1', type: 'oil_change', mileage_at_maintenance: 44100, cost: 25000, maintenance_date: '2026-05-15', description: 'Vidange complète' },
-      { id: 'm2', vehicle_id: 'v3', type: 'brakes', mileage_at_maintenance: 82100, cost: 45000, maintenance_date: '2026-06-02', description: 'Changement plaquettes' }
-    ];
+    const initialMaintenances = [];
     return getFromDb('maintenances', initialMaintenances);
   });
   const [incidents, setIncidents] = useState(() => getFromDb('incidents', []));
